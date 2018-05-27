@@ -9,6 +9,9 @@ class BaseObject extends egret.Sprite {
     private _edgeW: number = 0;
     private _edgeH: number = 0;
 
+    /** 对象类型(ObjectType有对应枚举) */
+    public type:number = 0;
+
     /** 方向速度 */
     private _speed: number = 0;
     /** 角度 */
