@@ -60,6 +60,7 @@ class Main extends eui.UILayer {
     private async runGame() {
         await this.loadResource()
 
+        //游戏入口初始化
         let t_entry = new GameEntry();
         this.addChild(t_entry);
         t_entry.start();
