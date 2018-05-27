@@ -129,7 +129,7 @@ class BaseObject extends egret.Sprite {
         this._testBtn.x = -this.width / 2;
         this._testBtn.y = -this.height / 2;
         this.addChild(this._testBtn);
-        this._testBtn.skinName = 
+        // this._testBtn.skinName = 
 
         this._testBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onClickHandler, this);
     }

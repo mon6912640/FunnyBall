@@ -35,7 +35,6 @@ class GameEntry extends egret.Sprite {
 
 
         for (let i = 0; i < 100; i++) {
-        // for (let i = 0; i < 1; i++) {
             let t_obj = new BaseObject();
             t_obj.initView(20, 20, this._stageW, this._stageH);
             this.addChild(t_obj);
