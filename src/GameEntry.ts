@@ -9,8 +9,6 @@ class GameEntry extends egret.Sprite {
 
     private _objectList:BaseObject[] = [];
 
-    private _btn1:eui.Button;
-
     constructor() {
         super();
     }
@@ -25,14 +23,6 @@ class GameEntry extends egret.Sprite {
         this.graphics.beginFill(0xffffff);
         this.graphics.drawRect(0, 0, this._stageW, this._stageH);
         this.graphics.endFill();
-
-        this._btn1 = new eui.Button();
-        // this._btn1.label = "Click!";
-        // button.horizontalCenter = 0;
-        // button.verticalCenter = 0;
-        this.addChild(this._btn1);
-        this._btn1.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onButtonClick, this);
-
 
         for (let i = 0; i < 100; i++) {
             let t_obj = new BaseObject();
@@ -72,16 +62,6 @@ class GameEntry extends egret.Sprite {
     }
 
     //===================================== Handler =====================================
-    private onButtonClick(e:egret.TouchEvent)
-    {
-        switch(e.currentTarget)
-        {
-            case this._btn1:
-                // console.log("fuck");
-                break;
-        }
-    }
-
     private onClickHandler(e:egret.TouchEvent)
     {
         console.log("fuck");

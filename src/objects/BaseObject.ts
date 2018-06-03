@@ -20,8 +20,6 @@ class BaseObject extends egret.Sprite {
     private _speedXChange:boolean = false;
     private _speedYChange:boolean = false;
 
-    private _testBtn: eui.Button;
-
     constructor() {
         super()
     }
@@ -122,17 +120,9 @@ class BaseObject extends egret.Sprite {
         this._edgeW = pEdgeW;
         this._edgeH = pEdgeH;
 
-        // this.graphics.beginFill(0);
-        // this.graphics.drawRect(-this.width/2, -this.height/2, this.width, this.height);
-        // this.graphics.endFill();
-
-        this._testBtn = new eui.Button();
-        this._testBtn.width = this.width;
-        this._testBtn.height = this.height;
-        this._testBtn.x = -this.width / 2;
-        this._testBtn.y = -this.height / 2;
-        this.addChild(this._testBtn);
-        // this._testBtn.skinName = 
+        this.graphics.beginFill(0);
+        this.graphics.drawRect(-this.width/2, -this.height/2, this.width, this.height);
+        this.graphics.endFill();
     }
 
     /** 检查边界，修正角度 */
