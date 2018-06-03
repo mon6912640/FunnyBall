@@ -10,14 +10,15 @@
 		"libs/modules/promise/promise.js"
 	],
 	"game": [
+		"bin-debug/ThemeAdapter.js",
 		"bin-debug/AssetAdapter.js",
-		"bin-debug/GameEntry.js",
 		"bin-debug/LoadingUI.js",
 		"bin-debug/Main.js",
 		"bin-debug/Platform.js",
-		"bin-debug/ThemeAdapter.js",
+		"bin-debug/GameEntry.js",
 		"bin-debug/monkey/utils/MathUtil.js",
 		"bin-debug/objects/BaseObject.js",
+		"bin-debug/objects/ObjectType.js",
 		"bin-debug/quadtree/Quadtree.js",
 		"bin-debug/quadtree/QuadtreeEnum.js"
 	]

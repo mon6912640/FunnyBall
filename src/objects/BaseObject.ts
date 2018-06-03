@@ -133,8 +133,6 @@ class BaseObject extends egret.Sprite {
         this._testBtn.y = -this.height / 2;
         this.addChild(this._testBtn);
         // this._testBtn.skinName = 
-
-        this._testBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onClickHandler, this);
     }
 
     /** 检查边界，修正角度 */
@@ -162,7 +160,4 @@ class BaseObject extends egret.Sprite {
     //================================= private method ==================================
 
     //===================================== Handler =====================================
-    private onClickHandler(e: egret.TouchEvent) {
-        console.log(this.x, this.y);
-    }
 }
