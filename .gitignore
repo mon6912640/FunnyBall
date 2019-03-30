@@ -3,3 +3,4 @@ bin-debug/
 .vscode/
 temp/
 egret.d.ts
+manifest.json
