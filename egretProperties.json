@@ -1,32 +1,32 @@
 {
-  "engineVersion": "5.1.7",
-  "compilerVersion": "5.1.7",
-  "template": {},
-  "target": {
-    "current": "web"
-  },
-  "modules": [
-    {
-      "name": "egret"
-    },
-    {
-      "name": "game"
-    },
-    {
-      "name": "tween"
-    },
-    {
-      "name": "assetsmanager"
-    },
-    {
-      "name": "socket"
-    },
-    {
-      "name": "promise"
-    },
-    {
-      "name": "fairygui",
-      "path": "./libs/fairygui"
-    }
-  ]
+	"engineVersion": "5.2.16",
+	"compilerVersion": "5.2.16",
+	"template": {},
+	"target": {
+		"current": "web"
+	},
+	"modules": [
+		{
+			"name": "egret"
+		},
+		{
+			"name": "game"
+		},
+		{
+			"name": "tween"
+		},
+		{
+			"name": "assetsmanager"
+		},
+		{
+			"name": "socket"
+		},
+		{
+			"name": "promise"
+		},
+		{
+			"name": "fairygui",
+			"path": "./libs/fairygui"
+		}
+	]
 }
