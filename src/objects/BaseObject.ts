@@ -2,30 +2,33 @@
  * @author: monkey.lu 
  * @date: 2018-05-06 14:28:44 
  */
-class BaseObject extends egret.Sprite {
+class BaseObject {
 
-    private _width: number = 0;
-    private _height: number = 0;
-    private _edgeW: number = 0;
-    private _edgeH: number = 0;
+    protected _width: number = 0;
+    protected _height: number = 0;
+    protected _edgeW: number = 0;
+    protected _edgeH: number = 0;
+
+    public view:fairygui.GComponent;
 
     /** 对象类型(ObjectType有对应枚举) */
     public type:number = 0;
 
     /** 方向速度 */
-    private _speed: number = 0;
+    protected _speed: number = 0;
     /** 角度 */
-    private _angle: number = 0;
+    protected _angle: number = 0;
 
-    private _speedXChange:boolean = false;
-    private _speedYChange:boolean = false;
+    /** x轴速度改变标识 */
+    protected _speedXChange:boolean = false;
+    /** y轴速度改变标识 */
+    protected _speedYChange:boolean = false;
 
     constructor() {
-        super()
     }
 
     //=============================== gettter and setter ================================
-    private _radian:number = 0;
+    protected _radian:number = 0;
     /** 弧度 */
     public get radian(): number {
         return this._radian;
@@ -54,7 +57,7 @@ class BaseObject extends egret.Sprite {
         this._speedYChange = true;
     }
 
-    private _speedX:number = 0;
+    protected _speedX:number = 0;
     /**
      * x轴速度
      */
@@ -75,7 +78,7 @@ class BaseObject extends egret.Sprite {
         return this._speedX;
     }
 
-    private _speedY:number = 0;
+    protected _speedY:number = 0;
     /**
      * y轴速度
      */
@@ -98,31 +101,72 @@ class BaseObject extends egret.Sprite {
 
     public set width(value: number) {
         this._width = value;
+        if(this.view)
+            this.view.width = value;
     }
-
     public get width(): number {
         return this._width;
     }
 
     public set height(value: number) {
         this._height = value;
+        if(this.view)
+            this.view.height = value;
     }
-
     public get height(): number {
         return this._height;
     }
 
+    protected _x: number;
+    public get x(): number {
+        return this._x;
+    }
+    public set x(value: number) {
+        this._x = value;
+        if(this.view)
+            this.view.x = value;
+    }
+
+    protected _y: number;
+    public get y(): number {
+        return this._y;
+    }
+    public set y(value: number) {
+        this._y = value;
+        if(this.view)
+            this.view.y = value;
+    }
+
     //======================================= API =======================================
     public initView(pW: number, pH: number, pEdgeW: number, pEdgeH: number) {
+        this.initType();
+
         this.width = pW;
         this.height = pH;
 
         this._edgeW = pEdgeW;
         this._edgeH = pEdgeH;
 
-        this.graphics.beginFill(0);
-        this.graphics.drawRect(-this.width/2, -this.height/2, this.width, this.height);
-        this.graphics.endFill();
+        // this.graphics.beginFill(0);
+        // this.graphics.drawRect(-this.width/2, -this.height/2, this.width, this.height);
+        // this.graphics.endFill();
+    }
+
+    /**
+     * 初始化类型，由之类重写
+     */
+    protected initType()
+    {
+        //由之类重写
+    }
+
+    /**
+     * 碰撞检测方法
+     * @param pObj 
+     */
+    public hitTest(pObj:BaseObject):boolean
+    {
+        return false;
     }
 
     /** 检查边界，修正角度 */

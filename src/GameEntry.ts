@@ -25,27 +25,27 @@ class GameEntry extends egret.Sprite {
         this.graphics.drawRect(0, 0, this._stageW, this._stageH);
         this.graphics.endFill();
 
-        for (let i = 0; i < 100; i++) {
-            let t_obj = new BaseObject();
-            t_obj.initView(20, 20, this._stageW, this._stageH);
-            this.addChild(t_obj);
-            t_obj.x = this.getInitRandomPos(t_obj.width, this._stageW);
-            if(t_obj.x > (this._stageW-t_obj.width))
-                console.log("fuckx", t_obj.x);
-            t_obj.y = this.getInitRandomPos(t_obj.height, this._stageH);
-            if(t_obj.y > (this._stageH-t_obj.height))
-                console.log("fucky", t_obj.y);
+        // for (let i = 0; i < 100; i++) {
+        //     let t_obj = new BaseObject();
+        //     t_obj.initView(20, 20, this._stageW, this._stageH);
+        //     this.addChild(t_obj);
+        //     t_obj.x = this.getInitRandomPos(t_obj.width, this._stageW);
+        //     if(t_obj.x > (this._stageW-t_obj.width))
+        //         console.log("fuckx", t_obj.x);
+        //     t_obj.y = this.getInitRandomPos(t_obj.height, this._stageH);
+        //     if(t_obj.y > (this._stageH-t_obj.height))
+        //         console.log("fucky", t_obj.y);
 
-            t_obj.speed = 10+monkey.MathUtil.RandomInt(10);
-            t_obj.angle = this.getAngle();
-            // console.log(t_obj.speedX);
-            // console.log(t_obj.speedY);
-            this._objectList.push(t_obj);
-        }
+        //     t_obj.speed = 10+monkey.MathUtil.RandomInt(10);
+        //     t_obj.angle = this.getAngle();
+        //     // console.log(t_obj.speedX);
+        //     // console.log(t_obj.speedY);
+        //     this._objectList.push(t_obj);
+        // }
 
-        this._quad = new Quadtree(0, new egret.Rectangle(0, 0, this._stageW, this._stageH));
+        // this._quad = new Quadtree(0, new egret.Rectangle(0, 0, this._stageW, this._stageH));
 
-        this.addEventListener(egret.Event.ENTER_FRAME, this.onEnterFrameHandler, this);
+        // this.addEventListener(egret.Event.ENTER_FRAME, this.onEnterFrameHandler, this);
         // this.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onClickHandler, this);
     }
 

@@ -28,20 +28,36 @@ class Main extends egret.DisplayObjectContainer {
     private async runGame() {
         await this.loadResource();
 
-        //游戏入口初始化
+        // 游戏入口初始化
         // let t_entry = new GameEntry();
         // this.addChild(t_entry);
         // t_entry.start();
+
+        UIBindMgr.setup();
         
         fairygui.UIPackage.addPackage("main");
         this.addChild(fairygui.GRoot.inst.displayObject);
 
         let t_mainUI = new MainUIView();
         fairygui.GRoot.inst.addChild(t_mainUI.view);
+        t_mainUI.start();
 
-        await platform.login();
-        const userInfo = await platform.getUserInfo();
-        console.log(userInfo);
+        // await platform.login();
+        // const userInfo = await platform.getUserInfo();
+        // console.log(userInfo);
+
+        let t_num1 = 0b1;
+        let t_num2 = 0b10;
+        let t_num3 = 0b100;
+
+        let t_result = 0;
+        t_result |= t_num1;
+        t_result |= t_num1;
+        console.log(t_result.toString(2));
+        console.log((t_result&t_num1) == t_num1);
+        console.log((t_result&t_num2) == t_num2);
+        console.log((t_result&t_num3) == t_num3);
+        
     }
 
     private async loadResource() {

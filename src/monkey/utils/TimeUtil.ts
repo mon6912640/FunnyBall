@@ -20,9 +20,10 @@ module monkey {
         /**
          * 输出时间戳
          */
-        public static showMarkTs()
+        public static showMarkTs(pStr:string = "")
         {
-            console.log(egret.getTimer() - this._markTs);
+            let t_time = egret.getTimer() - this._markTs;
+            console.log(pStr + t_time);
         }
     }
 }

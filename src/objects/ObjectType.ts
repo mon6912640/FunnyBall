@@ -4,8 +4,8 @@
  * @date: 2018-05-27 21:26:53 
  */
 enum ObjectType {
-    /** 矩形 */
-    RETANGLE,
     /** 圆形 */
-    CIRCLE
+    CIRCLE = 0b1,
+    /** 矩形 */
+    RETANGLE = 0b10
 }

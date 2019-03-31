@@ -1,17 +1,17 @@
 /**
+ * UI绑定管理器
  * @author: monkey.lu 
- * @date: 2018-06-03 17:09:30 
+ * @date: 2019-03-31 20:13:06 
  */
-class BaseItem extends main.UI_BaseItemGUI {
+class UIBindMgr {
     constructor() {
-        super();
     }
     
-    protected constructFromXML(xml: any): void {
-        super.constructFromXML(xml);
-    }
-
     //=============================== gettter and setter ================================
+    static setup()
+    {
+        fairygui.UIObjectFactory.setPackageItemExtension(main.UI_BaseItemGUI.URL, BaseItem);
+    }
     //======================================= API =======================================
     //================================ override method ==================================
     //================================= private method ==================================

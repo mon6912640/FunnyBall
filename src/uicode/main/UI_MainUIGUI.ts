@@ -4,7 +4,7 @@ module main {
 
 	export class UI_MainUIGUI extends fairygui.GComponent {
 
-		public m_myItem:fairygui.GImage;
+		public m_bg:fairygui.GGraph;
 
 		public static URL:string = "ui://wk5bg6ykq0y91";
 
@@ -19,7 +19,7 @@ module main {
 		protected constructFromXML(xml: any): void {
 			super.constructFromXML(xml);
 
-			this.m_myItem = <fairygui.GImage><any>(this.getChildAt(0));
+			this.m_bg = <fairygui.GGraph><any>(this.getChildAt(0));
 		}
 	}
 }
