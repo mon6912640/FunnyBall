@@ -135,7 +135,10 @@ class Quadtree {
             let t_node = this._nodeList[t_index];
             t_node.retrieve(pObj, pResultList);
         }
-        pResultList = pResultList.concat(this._objectList);
+        for(let v of this._objectList)
+        {
+            pResultList.push(v);
+        }
         return pResultList;
     }
 

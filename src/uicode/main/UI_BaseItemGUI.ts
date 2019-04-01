@@ -5,6 +5,7 @@ module main {
 	export class UI_BaseItemGUI extends fairygui.GComponent {
 
 		public m_bgLoader:fairygui.GLoader;
+		public m_tfId:fairygui.GTextField;
 
 		public static URL:string = "ui://wk5bg6ykq0y92";
 
@@ -20,6 +21,7 @@ module main {
 			super.constructFromXML(xml);
 
 			this.m_bgLoader = <fairygui.GLoader><any>(this.getChildAt(0));
+			this.m_tfId = <fairygui.GTextField><any>(this.getChildAt(1));
 		}
 	}
 }

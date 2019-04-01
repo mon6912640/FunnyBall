@@ -29,10 +29,11 @@ class MainUIView extends monkey.BaseView {
         this._stageW = fairygui.GRoot.inst.width
         this._stageH = fairygui.GRoot.inst.height;
 
-        for(let i = 0; i<200; i++)
+        for(let i = 0; i<50; i++)
         {
             let t_obj = new ObjectCircle();
-            t_obj.initView(30, 30, this._stageW, this._stageH);
+            t_obj.initView(50, 50, this._stageW, this._stageH);
+            t_obj.id = i+1;
             this.view.addChild(t_obj.view);
             t_obj.x = this.getInitRandomPos(t_obj.width, this._stageW);
             if(t_obj.x > (this._stageW-t_obj.width))
@@ -42,6 +43,7 @@ class MainUIView extends monkey.BaseView {
                 console.log("fucky", t_obj.y);
 
             // t_obj.speed = 10+monkey.MathUtil.RandomInt(10);
+            // t_obj.speed = 5+monkey.MathUtil.RandomInt(5);
             t_obj.speed = 3;
             t_obj.angle = this.getAngle();
 
@@ -69,9 +71,12 @@ class MainUIView extends monkey.BaseView {
     }
 
     //===================================== Handler =====================================
+    private _maxHitCount:number;
+    private _minHitCount:number;
     private onEnterFrameHandler(e:egret.Event)
     {
         // monkey.TimeUtil.markTs();
+        let t_hitCount = 0;
         this._quad.clear();
         for(let v of this._objectList)
         {
@@ -80,22 +85,51 @@ class MainUIView extends monkey.BaseView {
             v.checkEdge();
 
             this._quad.insert(v);
+
+            v.hitTestFlag = false; //重置碰撞检测状态
+            v.handleHitTest(false);
         }
         
         let t_resultList:BaseObject[] = [];
+        // let t_hitTestTrueMap:BaseObject[] = [];
         for(let v of this._objectList)
         {
+            if(v.hitTestFlag)
+                continue;
             t_resultList.length = 0;
             this._quad.retrieve(v, t_resultList);
             // console.log("检索对象数量="+t_resultList.length);
             
             for(let v1 of t_resultList)
             {
-                //TODO 碰撞检测
+                if(v == v1)
+                    continue;
+                if(v1.hitTestFlag)
+                    continue;
+                //碰撞检测
                 //参考网址 https://github.com/JChehe/blog/issues/8
-                HitTestMgr.hitTest(v, v1);
+                let t_hitFlag = HitTestMgr.hitTest(v, v1);
+                t_hitCount++;
+                if(t_hitFlag)
+                {
+                    v.hitTestFlag = true; //记录碰撞检测状态
+                    v1.hitTestFlag = true;
+                    v.handleHitTest(t_hitFlag);
+                    v1.handleHitTest(t_hitFlag);
+                    // t_hitTestTrueMap.push(v);
+                    continue;
+                }
             }
         }
+
+        if(this._maxHitCount === undefined || t_hitCount > this._maxHitCount)
+            this._maxHitCount = t_hitCount;
+        if(this._minHitCount === undefined || t_hitCount < this._minHitCount)
+            this._minHitCount = t_hitCount;
+
+
         // monkey.TimeUtil.showMarkTs("用时");
+        console.log("碰撞检测次数="+t_hitCount, "max="+this._maxHitCount, "min="+this._minHitCount);
+        
     }
 }

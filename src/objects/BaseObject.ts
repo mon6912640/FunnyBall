@@ -24,10 +24,20 @@ class BaseObject {
     /** y轴速度改变标识 */
     protected _speedYChange:boolean = false;
 
+    public hitTestFlag = false;
+
     constructor() {
     }
 
     //=============================== gettter and setter ================================
+    protected _id: number = 0;
+    public get id(): number {
+        return this._id;
+    }
+    public set id(value: number) {
+        this._id = value;
+    }
+
     protected _radian:number = 0;
     /** 弧度 */
     public get radian(): number {
@@ -161,12 +171,12 @@ class BaseObject {
     }
 
     /**
-     * 碰撞检测方法
+     * 处理碰撞检测方法
      * @param pObj 
      */
-    public hitTest(pObj:BaseObject):boolean
+    public handleHitTest(pFlag:boolean)
     {
-        return false;
+        //由子类重写
     }
 
     /** 检查边界，修正角度 */

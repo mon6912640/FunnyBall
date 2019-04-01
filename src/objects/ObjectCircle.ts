@@ -6,16 +6,43 @@ class ObjectCircle extends BaseObject {
     
     public view:BaseItem;
 
+    private _urlNormal:string;
+    private _urlHitTest:string;
+
     constructor() {
         super();
         this.type = ObjectType.CIRCLE;
+        //圆的注册点在视点中心
     }
 
     //=============================== gettter and setter ================================
+    public set id(value:number)
+    {
+        this._id = value;
+        if(this.view)
+            this.view.m_tfId.text = value+"";
+    }
     //======================================= API =======================================
     protected initType()
     {
+        super.initType();
         this.view = BaseItem.createInstance() as BaseItem;
+
+        this.handleHitTest(false);
+    }
+
+    public handleHitTest(pFlag:boolean)
+    {
+        super.handleHitTest(pFlag);
+        if(this._urlNormal === undefined)
+            this._urlNormal = fairygui.UIPackage.getItemURL("main", "basecircle");
+        if(this._urlHitTest === undefined)
+            this._urlHitTest = fairygui.UIPackage.getItemURL("main", "basecircle_red");
+
+        if(pFlag)
+            this.view.m_bgLoader.url = this._urlHitTest;
+        else
+            this.view.m_bgLoader.url = this._urlNormal;
     }
 
     /** 检查边界，修正角度 */
