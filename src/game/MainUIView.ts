@@ -29,7 +29,7 @@ class MainUIView extends monkey.BaseView {
         this._stageW = fairygui.GRoot.inst.width
         this._stageH = fairygui.GRoot.inst.height;
 
-        for(let i = 0; i<50; i++)
+        for(let i = 0; i<200; i++)
         {
             let t_obj = new ObjectCircle();
             t_obj.initView(50, 50, this._stageW, this._stageH);
@@ -53,10 +53,23 @@ class MainUIView extends monkey.BaseView {
         this._quad = new Quadtree(0, new egret.Rectangle(0, 0, this._stageW, this._stageH));
 
         this.view.addEventListener(egret.Event.ENTER_FRAME, this.onEnterFrameHandler, this);
+
+        monkey.SimpleTimer.ins().addTimer(this.onTimer, this, 3000, 1)
+    }
+
+    private onTimer()
+    {
+        monkey.EventUtil.register(true, this.view.m_btnStop, egret.TouchEvent.TOUCH_TAP, this.onClickHandler, this);
     }
 
     //================================ override method ==================================
     //================================= private method ==================================
+    private _pause = false;
+    private onClickHandler(e:egret.TouchEvent)
+    {
+        this._pause != this._pause;
+    }
+
     private getInitRandomPos(pObjW:number, pStageW:number):number
     {
         return pObjW+monkey.MathUtil.RandomInt(pStageW-pObjW*2);
@@ -73,8 +86,13 @@ class MainUIView extends monkey.BaseView {
     //===================================== Handler =====================================
     private _maxHitCount:number;
     private _minHitCount:number;
+    private _totalHitCount:number = 0;
+    private _hitTime:number = 0;
+    private _averageCount = 0;
     private onEnterFrameHandler(e:egret.Event)
     {
+        if(this._pause)
+            return;
         // monkey.TimeUtil.markTs();
         let t_hitCount = 0;
         this._quad.clear();
@@ -86,50 +104,54 @@ class MainUIView extends monkey.BaseView {
 
             this._quad.insert(v);
 
-            v.hitTestFlag = false; //重置碰撞检测状态
             v.handleHitTest(false);
+            v.resetBeforeHitTest();//重置碰撞检测状态
         }
         
         let t_resultList:BaseObject[] = [];
-        // let t_hitTestTrueMap:BaseObject[] = [];
         for(let v of this._objectList)
         {
             if(v.hitTestFlag)
                 continue;
             t_resultList.length = 0;
-            this._quad.retrieve(v, t_resultList);
+            this._quad.retrieve(v, t_resultList); //检索对象所在区间的对象列表
             // console.log("检索对象数量="+t_resultList.length);
             
             for(let v1 of t_resultList)
             {
                 if(v == v1)
                     continue;
-                if(v1.hitTestFlag)
+                if(v.checkHadHitTest(v1))
                     continue;
                 //碰撞检测
                 //参考网址 https://github.com/JChehe/blog/issues/8
                 let t_hitFlag = HitTestMgr.hitTest(v, v1);
                 t_hitCount++;
+                v.markCheckHittest(v1);
+                v1.markCheckHittest(v);
                 if(t_hitFlag)
                 {
                     v.hitTestFlag = true; //记录碰撞检测状态
                     v1.hitTestFlag = true;
                     v.handleHitTest(t_hitFlag);
                     v1.handleHitTest(t_hitFlag);
-                    // t_hitTestTrueMap.push(v);
                     continue;
                 }
             }
         }
+
+        //算法性能量化数据
+        this._totalHitCount += t_hitCount;
+        this._hitTime++;
+        this._averageCount = ~~(this._totalHitCount/this._hitTime);
 
         if(this._maxHitCount === undefined || t_hitCount > this._maxHitCount)
             this._maxHitCount = t_hitCount;
         if(this._minHitCount === undefined || t_hitCount < this._minHitCount)
             this._minHitCount = t_hitCount;
 
-
         // monkey.TimeUtil.showMarkTs("用时");
-        console.log("碰撞检测次数="+t_hitCount, "max="+this._maxHitCount, "min="+this._minHitCount);
+        console.log("碰撞检测次数="+t_hitCount, "max="+this._maxHitCount, "min="+this._minHitCount, "avg="+this._averageCount);
         
     }
 }

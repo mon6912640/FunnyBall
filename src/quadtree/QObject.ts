@@ -3,4 +3,5 @@ type QObject={
     y:number;
     width:number;
     height:number;
+    getIndex(pBounds:egret.Rectangle):number;
 }

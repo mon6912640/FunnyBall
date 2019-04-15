@@ -1,8 +1,9 @@
 /**
+ * 基础对象类
  * @author: monkey.lu 
  * @date: 2018-05-06 14:28:44 
  */
-class BaseObject {
+class BaseObject extends egret.HashObject implements QObject{
 
     protected _width: number = 0;
     protected _height: number = 0;
@@ -24,9 +25,13 @@ class BaseObject {
     /** y轴速度改变标识 */
     protected _speedYChange:boolean = false;
 
+    /** 是否检测过碰撞（下次检测前会被重置） */
     public hitTestFlag = false;
+    /** 曾经碰撞检测过的对象映射表（下次检测前会被重置） */
+    protected _checkedMap:{[hashCode:number]:boolean} = {};
 
     constructor() {
+        super();
     }
 
     //=============================== gettter and setter ================================
@@ -179,7 +184,27 @@ class BaseObject {
         //由子类重写
     }
 
-    /** 检查边界，修正角度 */
+    public markCheckHittest(pObj:BaseObject)
+    {
+        this._checkedMap[pObj.hashCode] = true;
+    }
+
+    public checkHadHitTest(pObj:BaseObject):boolean
+    {
+        return this._checkedMap[pObj.hashCode];
+    }
+
+    /** 重置碰撞检测的状态 */
+    public resetBeforeHitTest()
+    {
+        this.hitTestFlag = false;
+        this._checkedMap = {};
+    }
+
+    /** 
+     * 检查边界，修正角度
+     * （默认对象的注册点在左上角，如果对象注册点不在左上角，需要子类重写该方法） 
+     */
     public checkEdge() {
         if (this.y < 0) {
             this.y = 0;
@@ -197,6 +222,43 @@ class BaseObject {
             this.x = this._edgeW;
             this.angle = 540 - this.angle;
         }
+    }
+
+    /**
+     * 判断物体属于哪个象限节点
+     * -1指当前节点在象限之间的边界上（压线），不属于四个象限节点，而属于父节点
+     * （默认对象的注册点在左上角，如果对象注册点不在左上角，需要子类重写该方法）
+     * @param pBounds 
+     */
+    public getIndex(pBounds:egret.Rectangle):number
+    {
+        let t_index = -1;
+
+        //水平和竖直中线
+        let t_xMidLine = pBounds.x + (pBounds.width >> 1);
+        let t_yMidLine = pBounds.y + (pBounds.height >> 1);
+
+        //物体完全位于上面两个象限区域
+        let t_isInTop = (this.y+this.height < t_yMidLine);
+        //物体完全位于下面两个象限区域
+        let t_isInBottom = (this.y > t_yMidLine);
+
+        if(this.x+this.width < t_xMidLine)
+        {
+            if(t_isInTop)
+                t_index = 1; //第二象限
+            else if(t_isInBottom)
+                t_index = 2; //第三象限
+        }
+        else if(this.x > t_xMidLine)
+        {
+            if(t_isInTop)
+                t_index = 0; //第一象限
+            else if(t_isInBottom)
+                t_index = 3; //第四象限
+        }
+
+        return t_index;
     }
 
     //================================ override method ==================================

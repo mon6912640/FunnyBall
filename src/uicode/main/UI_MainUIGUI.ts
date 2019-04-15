@@ -5,6 +5,7 @@ module main {
 	export class UI_MainUIGUI extends fairygui.GComponent {
 
 		public m_bg:fairygui.GGraph;
+		public m_btnStop:fairygui.GButton;
 
 		public static URL:string = "ui://wk5bg6ykq0y91";
 
@@ -20,6 +21,7 @@ module main {
 			super.constructFromXML(xml);
 
 			this.m_bg = <fairygui.GGraph><any>(this.getChildAt(0));
+			this.m_btnStop = <fairygui.GButton><any>(this.getChildAt(3));
 		}
 	}
 }

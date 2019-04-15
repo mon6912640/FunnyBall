@@ -51,7 +51,7 @@ class Quadtree {
     public recycle()
     {
         this._level = 0;
-        this._nodeIndex = -1
+        this._nodeIndex = -1;
         if(this._bounds)
         {
             egret.Rectangle.release(this._bounds);
@@ -179,34 +179,7 @@ class Quadtree {
      */
     private getIndex(pObj:QObject):number
     {
-        let t_index = -1;
-
-        //水平和竖直中线
-        let t_xMidLine = this._bounds.x + (this._bounds.width >> 1);
-        let t_yMidLine = this._bounds.y + (this._bounds.height >> 1);
-
-        //物体完全位于上面两个象限区域
-        let t_isInTop = (pObj.y < t_yMidLine && pObj.y+pObj.height <t_yMidLine);
-        //物体完全位于下面两个象限区域
-        let t_isInBottom = (pObj.y > t_yMidLine);
-
-        if(pObj.x < t_xMidLine && pObj.x+pObj.width < t_xMidLine)
-        {
-            if(t_isInTop)
-                t_index = 1; //第二象限
-            else if(t_isInBottom)
-                t_index = 2; //第三象限
-        }
-        else if(pObj.x > t_xMidLine)
-        {
-            if(t_isInTop)
-                t_index = 0; //第一象限
-            else if(t_isInBottom)
-                t_index = 3; //第四象限
-        }
-
-        //位于两条中线上 则为-1
-        return t_index;
+        return pObj.getIndex(this._bounds);
     }
 
     //===================================== Handler =====================================
