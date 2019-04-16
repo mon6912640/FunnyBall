@@ -156,6 +156,8 @@ class BaseObject extends egret.HashObject implements QObject{
     public initView(pW: number, pH: number, pEdgeW: number, pEdgeH: number) {
         this.initType();
 
+        this.view.touchable = false;
+
         this.width = pW;
         this.height = pH;
 

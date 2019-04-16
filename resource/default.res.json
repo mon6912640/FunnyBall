@@ -1,33 +1,18 @@
 {
 	"groups":[{
-			"keys":"bg_jpg,egret_icon_png,description_json,main_fui,main@atlas0_png",
+			"keys":"main,main_atlas0",
 			"name":"preload"
 		}],
 	"resources":[
 		{
-			"name":"bg_jpg",
-			"type":"image",
-			"url":"assets/bg.jpg"
-		},
-		{
-			"name":"egret_icon_png",
-			"type":"image",
-			"url":"assets/egret_icon.png"
-		},
-		{
-			"name":"description_json",
-			"type":"json",
-			"url":"config/description.json"
-		},
-		{
-			"name":"main_fui",
+			"name":"main",
 			"type":"bin",
-			"url":"assets/fgui/main.fui"
+			"url":"assets/fgui/main.bin"
 		},
 		{
-			"name":"main@atlas0_png",
+			"name":"main_atlas0",
 			"type":"image",
-			"url":"assets/fgui/main@atlas0.png"
+			"url":"assets/fgui/main_atlas0.png"
 		}
 	]
 }

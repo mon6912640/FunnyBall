@@ -26,6 +26,7 @@ declare module fairygui {
         private _focusable;
         private _tooltips;
         private _pixelSnapping;
+        private _disposed;
         private _relations;
         private _group;
         private _gears;
@@ -48,9 +49,7 @@ declare module fairygui {
         _name: string;
         _underConstruct: boolean;
         _gearLocked: boolean;
-        _yOffset: number;
         _sizePercentInGroup: number;
-        _sizeImplType: number;
         static _gInstanceCounter: number;
         static XY_CHANGED: string;
         static SIZE_CHANGED: string;
@@ -107,7 +106,7 @@ declare module fairygui {
         group: GGroup;
         getGear(index: number): GearBase;
         protected updateGear(index: number): void;
-        checkGearController(index: number, c: Controller): Boolean;
+        checkGearController(index: number, c: Controller): boolean;
         updateGearFromRelations(index: number, dx: number, dy: number): void;
         addDisplayLock(): number;
         releaseDisplayLock(token: number): void;
@@ -141,6 +140,7 @@ declare module fairygui {
         static cast(obj: egret.DisplayObject): GObject;
         text: string;
         icon: string;
+        readonly isDisposed: boolean;
         dispose(): void;
         addClickListener(listener: Function, thisObj: any): void;
         removeClickListener(listener: Function, thisObj: any): void;
@@ -170,9 +170,8 @@ declare module fairygui {
         protected handleAlphaChanged(): void;
         handleVisibleChanged(): void;
         constructFromResource(): void;
-        setup_beforeAdd(xml: any): void;
-        private static GearXMLKeys;
-        setup_afterAdd(xml: any): void;
+        setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
+        setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
         private static sGlobalDragStart;
         private static sGlobalRect;
         private static sHelperPoint;
@@ -209,7 +208,34 @@ declare module fairygui {
         protected onTag_FONT(tagName: string, end: boolean, attr: string): string;
         protected onTag_SIZE(tagName: string, end: boolean, attr: string): string;
         protected getTagText(remove?: boolean): string;
-        parse(text: string): string;
+        parse(text: string, remove?: boolean): string;
+    }
+}
+declare module fairygui {
+    class GearBase {
+        static disableAllTweenEffect: boolean;
+        protected _tweenConfig: GearTweenConfig;
+        protected _owner: GObject;
+        protected _controller: Controller;
+        constructor(owner: GObject);
+        dispose(): void;
+        controller: Controller;
+        readonly tweenConfig: GearTweenConfig;
+        setup(buffer: ByteBuffer): void;
+        updateFromRelations(dx: number, dy: number): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        protected init(): void;
+        apply(): void;
+        updateState(): void;
+    }
+    class GearTweenConfig {
+        tween: boolean;
+        easeType: number;
+        duration: number;
+        delay: number;
+        _displayLockToken: number;
+        _tweener: GTweener;
+        constructor();
     }
 }
 declare module fairygui {
@@ -258,18 +284,36 @@ declare module fairygui {
         Visible = 0,
         Hidden = 1,
         Scroll = 2,
-        Scale = 3,
-        ScaleFree = 4,
     }
     enum PackageItemType {
         Image = 0,
-        Swf = 1,
-        MovieClip = 2,
-        Sound = 3,
-        Component = 4,
-        Misc = 5,
-        Font = 6,
-        Atlas = 7,
+        MovieClip = 1,
+        Sound = 2,
+        Component = 3,
+        Atlas = 4,
+        Font = 5,
+        Swf = 6,
+        Misc = 7,
+        Unknown = 8,
+    }
+    enum ObjectType {
+        Image = 0,
+        MovieClip = 1,
+        Swf = 2,
+        Graph = 3,
+        Loader = 4,
+        Group = 5,
+        Text = 6,
+        RichText = 7,
+        InputText = 8,
+        Component = 9,
+        List = 10,
+        Label = 11,
+        Button = 12,
+        ComboBox = 13,
+        ProgressBar = 14,
+        Slider = 15,
+        ScrollBar = 16,
     }
     enum ProgressTitleType {
         Percent = 0,
@@ -304,6 +348,11 @@ declare module fairygui {
         Horizontal = 1,
         Vertical = 2,
     }
+    enum PopupDirection {
+        Auto = 0,
+        Up = 1,
+        Down = 2,
+    }
     enum RelationType {
         Left_Left = 0,
         Left_Center = 1,
@@ -331,58 +380,49 @@ declare module fairygui {
         BottomExt_Bottom = 23,
         Size = 24,
     }
-    function parseButtonMode(value: string): ButtonMode;
-    function parseAutoSizeType(value: string): AutoSizeType;
-    function parseAlignType(value: string): AlignType;
-    function getAlignTypeString(type: AlignType): string;
-    function getVertAlignTypeString(type: VertAlignType): string;
-    function parseVertAlignType(value: string): VertAlignType;
-    function parseLoaderFillType(value: string): LoaderFillType;
-    function parseListLayoutType(value: string): ListLayoutType;
-    function parseListSelectionMode(value: string): ListSelectionMode;
-    function parseOverflowType(value: string): OverflowType;
-    function parsePackageItemType(value: string): PackageItemType;
-    function parseProgressTitleType(value: string): ProgressTitleType;
-    function parseScrollBarDisplayType(value: string): ScrollBarDisplayType;
-    function parseScrollType(value: string): ScrollType;
-    function parseFlipType(value: string): FlipType;
-    function parseEaseType(value: string): Function;
-    function parseGroupLayoutType(value: string): GroupLayoutType;
+    enum FillMethod {
+        None = 0,
+        Horizontal = 1,
+        Vertical = 2,
+        Radial90 = 3,
+        Radial180 = 4,
+        Radial360 = 5,
+    }
+    enum FillOrigin {
+        Top = 0,
+        Bottom = 1,
+        Left = 2,
+        Right = 3,
+    }
+    enum FillOrigin90 {
+        TopLeft = 0,
+        TopRight = 1,
+        BottomLeft = 2,
+        BottomRight = 3,
+    }
 }
 declare module fairygui {
-    class GearBase {
-        static disableAllTweenEffect: boolean;
-        protected _tween: boolean;
-        protected _easeType: Function;
-        protected _tweenTime: number;
-        protected _tweenDelay: number;
-        protected _displayLockToken: number;
-        protected _owner: GObject;
-        protected _controller: Controller;
-        constructor(owner: GObject);
-        controller: Controller;
-        tween: boolean;
-        tweenDelay: number;
-        tweenTime: number;
-        easeType: Function;
-        setup(xml: any): void;
-        updateFromRelations(dx: number, dy: number): void;
-        protected addStatus(pageId: string, value: string): void;
-        protected init(): void;
-        apply(): void;
-        updateState(): void;
+    class ControllerAction {
+        fromPage: string[];
+        toPage: string[];
+        static createAction(type: number): ControllerAction;
+        constructor();
+        run(controller: Controller, prevPage: string, curPage: string): void;
+        protected enter(controller: Controller): void;
+        protected leave(controller: Controller): void;
+        setup(buffer: ByteBuffer): void;
     }
 }
 declare module fairygui {
     class GComponent extends GObject {
         private _sortingChildCount;
         private _opaque;
-        private _childrenRenderOrder;
-        private _apexIndex;
         private _applyingController;
         protected _margin: Margin;
         protected _trackBounds: boolean;
         protected _boundsChanged: boolean;
+        protected _childrenRenderOrder: ChildrenRenderOrder;
+        protected _apexIndex: number;
         _buildingDisplayList: boolean;
         _children: Array<GObject>;
         _controllers: Array<Controller>;
@@ -434,9 +474,10 @@ declare module fairygui {
         childrenRenderOrder: ChildrenRenderOrder;
         apexIndex: number;
         mask: egret.DisplayObject | egret.Rectangle;
+        readonly baseUserData: string;
         protected updateOpaque(): void;
         protected updateScrollRect(): void;
-        protected setupScroll(scrollBarMargin: Margin, scroll: ScrollType, scrollBarDisplay: ScrollBarDisplayType, flags: number, vtScrollBarRes: string, hzScrollBarRes: string, headerRes: string, footerRes: string): void;
+        protected setupScroll(buffer: ByteBuffer): void;
         protected setupOverflow(overflow: OverflowType): void;
         protected handleSizeChanged(): void;
         protected handleGrayedChanged(): void;
@@ -452,22 +493,11 @@ declare module fairygui {
         childSortingOrderChanged(child: GObject, oldValue: number, newValue?: number): void;
         constructFromResource(): void;
         constructFromResource2(objectPool: Array<GObject>, poolIndex: number): void;
+        protected constructExtension(buffer: ByteBuffer): void;
         protected constructFromXML(xml: any): void;
-        setup_afterAdd(xml: any): void;
+        setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
         private ___added(evt);
         private ___removed(evt);
-    }
-}
-declare module fairygui {
-    class ControllerAction {
-        fromPage: string[];
-        toPage: string[];
-        static createAction(type: string): ControllerAction;
-        constructor();
-        run(controller: Controller, prevPage: string, curPage: string): void;
-        protected enter(controller: Controller): void;
-        protected leave(controller: Controller): void;
-        setup(xml: any): void;
     }
 }
 declare module fairygui {
@@ -492,8 +522,10 @@ declare module fairygui {
         protected _color: number;
         protected _leading: number;
         protected _letterSpacing: number;
+        protected _underline: boolean;
         protected _text: string;
         protected _ubbEnabled: boolean;
+        protected _templateVars: any;
         protected _autoSize: AutoSizeType;
         protected _widthAutoSize: boolean;
         protected _heightAutoSize: boolean;
@@ -507,6 +539,7 @@ declare module fairygui {
         protected _bitmapPool: Array<egret.Bitmap>;
         protected static GUTTER_X: number;
         protected static GUTTER_Y: number;
+        protected static _htmlParser: egret.HtmlTextParser;
         constructor();
         protected createDisplayObject(): void;
         private switchBitmapMode(val);
@@ -518,6 +551,8 @@ declare module fairygui {
         color: number;
         align: AlignType;
         verticalAlign: VertAlignType;
+        private getAlignTypeString(type);
+        private getVertAlignTypeString(type);
         leading: number;
         letterSpacing: number;
         underline: boolean;
@@ -536,10 +571,14 @@ declare module fairygui {
         protected renderNow(updateBounds?: boolean): void;
         private renderWithBitmapFont(updateBounds);
         protected handleSizeChanged(): void;
+        protected parseTemplate(template: string): string;
+        templateVars: any;
+        setVar(name: string, value: string): GTextField;
+        flushVars(): void;
         protected handleGrayedChanged(): void;
         private doAlign();
-        setup_beforeAdd(xml: any): void;
-        setup_afterAdd(xml: any): void;
+        setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
+        setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
     }
     class LineInfo {
         width: number;
@@ -555,24 +594,32 @@ declare module fairygui {
     }
 }
 declare module fairygui {
-    class GearColor extends GearBase {
-        private _storage;
-        private _default;
-        constructor(owner: GObject);
-        protected init(): void;
-        protected addStatus(pageId: string, value: string): void;
-        apply(): void;
-        updateState(): void;
-    }
-}
-declare module fairygui {
-    class BitmapFont {
+    class PackageItem {
+        owner: UIPackage;
+        type: PackageItemType;
+        objectType: ObjectType;
         id: string;
-        size: number;
-        ttf: boolean;
-        glyphs: any;
-        resizable: boolean;
+        name: string;
+        width: number;
+        height: number;
+        file: string;
+        decoded: boolean;
+        rawData: ByteBuffer;
+        scale9Grid: egret.Rectangle;
+        scaleByTile: boolean;
+        tileGridIndice: number;
+        smoothing: boolean;
+        texture: egret.Texture;
+        interval: number;
+        repeatDelay: number;
+        swing: boolean;
+        frames: Array<Frame>;
+        extensionType: any;
+        sound: egret.Sound;
+        bitmapFont: BitmapFont;
         constructor();
+        load(): any;
+        toString(): string;
     }
 }
 declare module fairygui {
@@ -628,20 +675,18 @@ declare module fairygui {
 }
 declare module fairygui {
     class Controller extends egret.EventDispatcher {
-        private _name;
         private _selectedIndex;
         private _previousIndex;
         private _pageIds;
         private _pageNames;
         private _actions;
-        _parent: GComponent;
-        _autoRadioGroupDepth: boolean;
+        name: string;
+        parent: GComponent;
+        autoRadioGroupDepth: boolean;
         changing: boolean;
         private static _nextPageId;
         constructor();
         dispose(): void;
-        name: string;
-        readonly parent: GComponent;
         selectedIndex: number;
         setSelectedIndex(value?: number): void;
         readonly previsousIndex: number;
@@ -664,7 +709,7 @@ declare module fairygui {
         oppositePageId: string;
         readonly previousPageId: string;
         runActions(): void;
-        setup(xml: any): void;
+        setup(buffer: ByteBuffer): void;
     }
 }
 declare module fairygui {
@@ -679,7 +724,6 @@ declare module fairygui {
         static convertToHtmlColor(argb: number, hasAlpha?: boolean): string;
         static convertFromHtmlColor(str: string, hasAlpha?: boolean): number;
         static displayObjectToGObject(obj: egret.DisplayObject): GObject;
-        static findChildNode(xml: any, name: string): any;
         static encodeHTML(str: string): string;
         static defaultUBBParser: UBBParser;
         static parseUBB(text: string): string;
@@ -713,54 +757,207 @@ declare module fairygui {
     }
 }
 declare module fairygui {
+    class EaseManager {
+        private static _PiOver2;
+        private static _TwoPi;
+        static evaluate(easeType: number, time: number, duration: number, overshootOrAmplitude: number, period: number): number;
+    }
+}
+declare module fairygui {
+    class EaseType {
+        static Linear: number;
+        static SineIn: number;
+        static SineOut: number;
+        static SineInOut: number;
+        static QuadIn: number;
+        static QuadOut: number;
+        static QuadInOut: number;
+        static CubicIn: number;
+        static CubicOut: number;
+        static CubicInOut: number;
+        static QuartIn: number;
+        static QuartOut: number;
+        static QuartInOut: number;
+        static QuintIn: number;
+        static QuintOut: number;
+        static QuintInOut: number;
+        static ExpoIn: number;
+        static ExpoOut: number;
+        static ExpoInOut: number;
+        static CircIn: number;
+        static CircOut: number;
+        static CircInOut: number;
+        static ElasticIn: number;
+        static ElasticOut: number;
+        static ElasticInOut: number;
+        static BackIn: number;
+        static BackOut: number;
+        static BackInOut: number;
+        static BounceIn: number;
+        static BounceOut: number;
+        static BounceInOut: number;
+        static Custom: number;
+    }
+}
+declare module fairygui {
+    class GTween {
+        static catchCallbackExceptions: boolean;
+        static to(start: number, end: number, duration: number): GTweener;
+        static to2(start: number, start2: number, end: number, end2: number, duration: number): GTweener;
+        static to3(start: number, start2: number, start3: number, end: number, end2: number, end3: number, duration: number): GTweener;
+        static to4(start: number, start2: number, start3: number, start4: number, end: number, end2: number, end3: number, end4: number, duration: number): GTweener;
+        static toColor(start: number, end: number, duration: number): GTweener;
+        static delayedCall(delay: number): GTweener;
+        static shake(startX: number, startY: number, amplitude: number, duration: number): GTweener;
+        static isTweening(target: Object, propType: Object): Boolean;
+        static kill(target: Object, complete?: Boolean, propType?: Object): void;
+        static getTween(target: Object, propType?: Object): GTweener;
+    }
+}
+declare module fairygui {
+    class GTweener {
+        _target: any;
+        _propType: any;
+        _killed: boolean;
+        _paused: boolean;
+        private _delay;
+        private _duration;
+        private _breakpoint;
+        private _easeType;
+        private _easeOvershootOrAmplitude;
+        private _easePeriod;
+        private _repeat;
+        private _yoyo;
+        private _timeScale;
+        private _snapping;
+        private _userData;
+        private _onUpdate;
+        private _onStart;
+        private _onComplete;
+        private _onUpdateCaller;
+        private _onStartCaller;
+        private _onCompleteCaller;
+        private _startValue;
+        private _endValue;
+        private _value;
+        private _deltaValue;
+        private _valueSize;
+        private _started;
+        private _ended;
+        private _elapsedTime;
+        private _normalizedTime;
+        constructor();
+        setDelay(value: number): GTweener;
+        readonly delay: number;
+        setDuration(value: number): GTweener;
+        readonly duration: number;
+        setBreakpoint(value: number): GTweener;
+        setEase(value: number): GTweener;
+        setEasePeriod(value: number): GTweener;
+        setEaseOvershootOrAmplitude(value: number): GTweener;
+        setRepeat(repeat: number, yoyo?: boolean): GTweener;
+        readonly repeat: number;
+        setTimeScale(value: number): GTweener;
+        setSnapping(value: boolean): GTweener;
+        setTarget(value: Object, propType?: Object): GTweener;
+        readonly target: Object;
+        setUserData(value: any): GTweener;
+        readonly userData: any;
+        onUpdate(callback: Function, caller: any): GTweener;
+        onStart(callback: Function, caller: any): GTweener;
+        onComplete(callback: Function, caller: any): GTweener;
+        readonly startValue: TweenValue;
+        readonly endValue: TweenValue;
+        readonly value: TweenValue;
+        readonly deltaValue: TweenValue;
+        readonly normalizedTime: number;
+        readonly completed: boolean;
+        readonly allCompleted: boolean;
+        setPaused(paused: boolean): GTweener;
+        /**
+         * seek position of the tween, in seconds.
+         */
+        seek(time: number): void;
+        kill(complete?: boolean): void;
+        _to(start: number, end: number, duration: number): GTweener;
+        _to2(start: number, start2: number, end: number, end2: number, duration: number): GTweener;
+        _to3(start: number, start2: number, start3: number, end: number, end2: number, end3: number, duration: number): GTweener;
+        _to4(start: number, start2: number, start3: number, start4: number, end: number, end2: number, end3: number, end4: number, duration: number): GTweener;
+        _toColor(start: number, end: number, duration: number): GTweener;
+        _shake(startX: number, startY: number, amplitude: number, duration: number): GTweener;
+        _init(): void;
+        _reset(): void;
+        _update(dt: number): void;
+        private update();
+        private callStartCallback();
+        private callUpdateCallback();
+        private callCompleteCallback();
+    }
+}
+declare module fairygui {
+    class TweenManager {
+        private static _activeTweens;
+        private static _tweenerPool;
+        private static _totalActiveTweens;
+        private static _lastTime;
+        private static _inited;
+        static createTween(): GTweener;
+        static isTweening(target: any, propType: any): boolean;
+        static killTweens(target: any, completed: boolean, propType: any): boolean;
+        static getTween(target: any, propType: any): GTweener;
+        private static update(timestamp);
+    }
+}
+declare module fairygui {
+    class TweenValue {
+        x: number;
+        y: number;
+        z: number;
+        w: number;
+        constructor();
+        color: number;
+        getField(index: number): number;
+        setField(index: number, value: number): void;
+        setZero(): void;
+    }
+}
+declare module fairygui {
     class PlayTransitionAction extends ControllerAction {
         transitionName: string;
-        repeat: number;
+        playTimes: number;
         delay: number;
         stopOnExit: boolean;
         private _currentTransition;
         constructor();
         protected enter(controller: Controller): void;
         protected leave(controller: Controller): void;
-        setup(xml: any): void;
-    }
-}
-declare module fairygui {
-    class ChangePageAction extends ControllerAction {
-        objectId: string;
-        controllerName: string;
-        targetPage: string;
-        constructor();
-        protected enter(controller: Controller): void;
-        setup(xml: any): void;
+        setup(buffer: ByteBuffer): void;
     }
 }
 declare module fairygui {
     class GearSize extends GearBase {
-        tweener: egret.Tween;
         private _storage;
         private _default;
-        private _tweenValue;
-        private _tweenTarget;
         constructor(owner: GObject);
         protected init(): void;
-        protected addStatus(pageId: string, value: string): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
         apply(): void;
+        private __tweenUpdate(tweener);
+        private __tweenComplete();
         updateState(): void;
         updateFromRelations(dx: number, dy: number): void;
     }
 }
 declare module fairygui {
     class GearXY extends GearBase {
-        tweener: egret.Tween;
         private _storage;
         private _default;
-        private _tweenValue;
-        private _tweenTarget;
         constructor(owner: GObject);
         protected init(): void;
-        protected addStatus(pageId: string, value: string): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
         apply(): void;
+        private __tweenUpdate(tweener);
+        private __tweenComplete();
         updateState(): void;
         updateFromRelations(dx: number, dy: number): void;
     }
@@ -771,7 +968,7 @@ declare module fairygui {
         private _default;
         constructor(owner: GObject);
         protected init(): void;
-        protected addStatus(pageId: string, value: string): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
         apply(): void;
         updateState(): void;
     }
@@ -782,16 +979,72 @@ declare module fairygui {
         private _default;
         constructor(owner: GObject);
         protected init(): void;
-        protected addStatus(pageId: string, value: string): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
         apply(): void;
         updateState(): void;
     }
 }
 declare module fairygui {
+    class GearAnimation extends GearBase {
+        private _storage;
+        private _default;
+        constructor(owner: GObject);
+        protected init(): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        apply(): void;
+        updateState(): void;
+    }
+}
+declare module fairygui {
+    class GearColor extends GearBase {
+        private _storage;
+        private _default;
+        constructor(owner: GObject);
+        protected init(): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        apply(): void;
+        updateState(): void;
+    }
+}
+declare module fairygui {
+    class GearDisplay extends GearBase {
+        pages: string[];
+        private _visible;
+        private _displayLockToken;
+        constructor(owner: GObject);
+        protected init(): void;
+        apply(): void;
+        addLock(): number;
+        releaseLock(token: number): void;
+        readonly connected: boolean;
+    }
+}
+declare module fairygui {
+    class GearLook extends GearBase {
+        private _storage;
+        private _default;
+        constructor(owner: GObject);
+        protected init(): void;
+        protected addStatus(pageId: string, buffer: ByteBuffer): void;
+        apply(): void;
+        private __tweenUpdate(tweener);
+        private __tweenComplete();
+        updateState(): void;
+    }
+}
+declare module fairygui {
+    class ChangePageAction extends ControllerAction {
+        objectId: string;
+        controllerName: string;
+        targetPage: string;
+        constructor();
+        protected enter(controller: Controller): void;
+        setup(buffer: ByteBuffer): void;
+    }
+}
+declare module fairygui {
     class Transition {
         name: string;
-        autoPlayRepeat: number;
-        autoPlayDelay: number;
         private _owner;
         private _ownerBaseX;
         private _ownerBaseY;
@@ -799,111 +1052,76 @@ declare module fairygui {
         private _totalTimes;
         private _totalTasks;
         private _playing;
+        private _paused;
         private _onComplete;
-        private _onCompleteObj;
+        private _onCompleteCaller;
         private _onCompleteParam;
         private _options;
         private _reversed;
-        private _maxTime;
+        private _totalDuration;
         private _autoPlay;
+        private _autoPlayTimes;
+        private _autoPlayDelay;
+        private _timeScale;
+        private _startTime;
+        private _endTime;
         static OPTION_IGNORE_DISPLAY_CONTROLLER: number;
         static OPTION_AUTO_STOP_DISABLED: number;
         static OPTION_AUTO_STOP_AT_END: number;
-        private static FRAME_RATE;
         constructor(owner: GComponent);
-        autoPlay: boolean;
-        play(onComplete?: Function, onCompleteObj?: any, onCompleteParam?: any, times?: number, delay?: number): void;
+        play(onComplete?: Function, onCompleteObj?: any, onCompleteParam?: any, times?: number, delay?: number, startTime?: number, endTime?: number): void;
         playReverse(onComplete?: Function, onCompleteObj?: any, onCompleteParam?: any, times?: number, delay?: number): void;
-        changeRepeat(value: number): void;
-        private _play(onComplete?, onCompleteObj?, onCompleteParam?, times?, delay?, reversed?);
+        changePlayTimes(value: number): void;
+        setAutoPlay(value: boolean, times?: number, delay?: number): void;
+        private _play(onComplete?, onCompleteCaller?, onCompleteParam?, times?, delay?, startTime?, endTime?, reversed?);
         stop(setToComplete?: boolean, processCallback?: boolean): void;
         private stopItem(item, setToComplete);
+        setPaused(paused: boolean): void;
         dispose(): void;
         readonly playing: boolean;
         setValue(label: string, ...args: any[]): void;
-        setHook(label: string, callback: Function, thisObj: any): void;
+        setHook(label: string, callback: Function, caller: any): void;
         clearHooks(): void;
         setTarget(label: string, newTarget: GObject): void;
         setDuration(label: string, value: number): void;
+        getLabelTime(label: string): number;
+        timeScale: number;
         updateFromRelations(targetId: string, dx: number, dy: number): void;
-        OnOwnerRemovedFromStage(): void;
-        private internalPlay(delay?);
-        private prepareValue(item, toProps, reversed?);
-        private startTween(item, delay);
-        private __delayCall(item);
-        private __delayCall2(item);
-        private __tweenStart(item);
-        private __tweenUpdate();
-        private __tweenComplete(item);
-        private __tweenRepeatComplete(item);
-        private __playTransComplete(item);
+        onOwnerAddedToStage(): void;
+        onOwnerRemovedFromStage(): void;
+        private onDelayedPlay();
+        private internalPlay();
+        private playItem(item);
+        private skipAnimations();
+        private onDelayedPlayItem(tweener);
+        private onTweenStart(tweener);
+        private onTweenUpdate(tweener);
+        private onTweenComplete(tweener);
+        private onPlayTransCompleted(item);
+        private callHook(item, tweenEnd);
         private checkAllComplete();
-        private applyValue(item, value);
-        private __shake(trans);
-        private __shakeItem(item);
-        setup(xml: any): void;
-        private decodeValue(type, str, value);
+        private applyValue(item);
+        setup(buffer: ByteBuffer): void;
+        private decodeValue(item, buffer, value);
     }
 }
 declare module fairygui {
     class Frame {
-        rect: egret.Rectangle;
         addDelay: number;
         texture: egret.Texture;
         constructor();
     }
 }
 declare module fairygui {
-    class DisplayListItem {
-        packageItem: PackageItem;
-        type: string;
-        desc: any;
-        listItemCount: number;
-        constructor(packageItem: PackageItem, type: string);
-    }
-}
-declare module fairygui {
-    class PackageItem {
-        owner: UIPackage;
-        type: PackageItemType;
-        id: string;
-        name: string;
-        width: number;
-        height: number;
-        file: string;
-        decoded: boolean;
-        scale9Grid: egret.Rectangle;
-        scaleByTile: boolean;
-        tileGridIndice: number;
-        smoothing: boolean;
-        texture: egret.Texture;
-        interval: number;
-        repeatDelay: number;
-        swing: boolean;
-        frames: Array<Frame>;
-        componentData: any;
-        displayList: Array<DisplayListItem>;
-        extensionType: any;
-        sound: egret.Sound;
-        bitmapFont: BitmapFont;
-        constructor();
-        load(): any;
-        toString(): string;
-    }
-}
-declare module fairygui {
-    class MovieClip extends egret.DisplayObject {
+    class MovieClip extends egret.Bitmap {
         interval: number;
         swing: boolean;
         repeatDelay: number;
-        private playState;
-        private _texture;
-        private _needRebuild;
-        private _frameRect;
+        timeScale: number;
         private _playing;
         private _frameCount;
         private _frames;
-        private _currentFrame;
+        private _frame;
         private _start;
         private _end;
         private _times;
@@ -912,20 +1130,34 @@ declare module fairygui {
         private _callback;
         private _callbackObj;
         private _smoothing;
+        private _frameElapsed;
+        private _reversed;
+        private _repeatedCount;
         constructor();
         frames: Array<Frame>;
         readonly frameCount: number;
-        currentFrame: number;
+        frame: number;
         playing: boolean;
         smoothing: boolean;
+        rewind(): void;
+        syncStatus(anotherMc: MovieClip): void;
+        advance(timeInMiniseconds: number): void;
         setPlaySettings(start?: number, end?: number, times?: number, endAt?: number, endCallback?: Function, callbackObj?: any): void;
         private update();
-        private __playEnd();
-        private setFrame(frame);
-        $updateRenderNode(): void;
-        $measureContentBounds(bounds: egret.Rectangle): void;
+        private drawFrame();
+        private checkTimer();
         $onAddToStage(stage: egret.Stage, nestLevel: number): void;
         $onRemoveFromStage(): void;
+    }
+}
+declare module fairygui {
+    class UIContainer extends egret.DisplayObjectContainer {
+        private _hitArea;
+        private _invertedMatrix;
+        constructor();
+        invertedMatrix: egret.Matrix;
+        hitArea: egret.Rectangle;
+        $hitTest(stageX: number, stageY: number): egret.DisplayObject;
     }
 }
 declare module fairygui {
@@ -972,14 +1204,15 @@ declare module fairygui {
         readonly pageOption: PageOption;
         changeStateOnClick: boolean;
         linkedPopup: GObject;
+        getTextField(): GTextField;
         addStateListener(listener: Function, thisObj: any): void;
         removeStateListener(listener: Function, thisObj: any): void;
         fireClick(downEffect?: boolean): void;
         protected setState(val: string): void;
         handleControllerChanged(c: Controller): void;
         protected handleGrayedChanged(): void;
-        protected constructFromXML(xml: any): void;
-        setup_afterAdd(xml: any): void;
+        protected constructExtension(buffer: ByteBuffer): void;
+        setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
         private __rollover(evt);
         private __rollout(evt);
         private __mousedown(evt);
@@ -1000,7 +1233,7 @@ declare module fairygui {
         private _itemsUpdated;
         private _selectedIndex;
         private _buttonController;
-        private _popupDownward;
+        private _popupDirection;
         private _selectionController;
         private _over;
         private _down;
@@ -1008,20 +1241,22 @@ declare module fairygui {
         text: string;
         icon: string;
         titleColor: number;
+        titleFontSize: number;
         visibleItemCount: number;
-        popupDownward: any;
+        popupDirection: PopupDirection;
         items: Array<string>;
         icons: Array<string>;
         values: Array<string>;
         selectedIndex: number;
         value: string;
         selectionController: Controller;
+        getTextField(): GTextField;
         protected setState(val: string): void;
-        protected constructFromXML(xml: any): void;
+        protected constructExtension(buffer: ByteBuffer): void;
         handleControllerChanged(c: Controller): void;
         private updateSelectionController();
         dispose(): void;
-        setup_afterAdd(xml: any): void;
+        setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
         protected showDropdown(): void;
         private __popupWinClosed(evt);
         private __clickItem(evt);
@@ -1033,59 +1268,6 @@ declare module fairygui {
     }
 }
 declare module fairygui {
-    class GearAnimation extends GearBase {
-        private _storage;
-        private _default;
-        constructor(owner: GObject);
-        protected init(): void;
-        protected addStatus(pageId: string, value: string): void;
-        apply(): void;
-        updateState(): void;
-    }
-}
-declare module fairygui {
-    class PlayState {
-        reachEnding: boolean;
-        reversed: boolean;
-        repeatedCount: number;
-        private _curFrame;
-        private _curFrameDelay;
-        private _lastUpdateSeq;
-        constructor();
-        update(mc: MovieClip): void;
-        currentFrame: number;
-        rewind(): void;
-        reset(): void;
-        copy(src: PlayState): void;
-    }
-}
-declare module fairygui {
-    class GearDisplay extends GearBase {
-        pages: string[];
-        private _visible;
-        constructor(owner: GObject);
-        protected init(): void;
-        apply(): void;
-        addLock(): number;
-        releaseLock(token: number): void;
-        readonly connected: boolean;
-    }
-}
-declare module fairygui {
-    class GearLook extends GearBase {
-        tweener: egret.Tween;
-        private _storage;
-        private _default;
-        private _tweenValue;
-        private _tweenTarget;
-        constructor(owner: GObject);
-        protected init(): void;
-        protected addStatus(pageId: string, value: string): void;
-        apply(): void;
-        updateState(): void;
-    }
-}
-declare module fairygui {
     class GGraph extends GObject {
         private _graphics;
         private _type;
@@ -1094,7 +1276,7 @@ declare module fairygui {
         private _lineAlpha;
         private _fillColor;
         private _fillAlpha;
-        private _corner;
+        private _cornerRadius;
         constructor();
         readonly graphics: egret.Graphics;
         drawRect(lineSize: number, lineColor: number, lineAlpha: number, fillColor: number, fillAlpha: number, corner?: Array<number>): void;
@@ -1108,7 +1290,7 @@ declare module fairygui {
         setNativeObject(obj: egret.DisplayObject): void;
         private delayCreateDisplayObject();
         protected handleSizeChanged(): void;
-        setup_beforeAdd(xml: any): void;
+        setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
     }
 }
 declare module fairygui {
@@ -1132,8 +1314,8 @@ declare module fairygui {
         resizeChildren(dw: number, dh: number): void;
         protected handleAlphaChanged(): void;
         handleVisibleChanged(): void;
-        setup_beforeAdd(xml: any): void;
-        setup_afterAdd(xml: any): void;
+        setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
+        setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
     }
 }
 declare module fairygui {
@@ -1142,18 +1324,28 @@ declare module fairygui {
         private _color;
         private _flip;
         private _matrix;
+        private _fillMethod;
+        private _fillOrigin;
+        private _fillAmount;
+        private _fillClockwise;
+        protected fillStart: number;
         constructor();
         private getColorMatrix();
         color: number;
         private applyColor();
         flip: FlipType;
+        fillMethod: FillMethod;
+        fillOrigin: FillOrigin | FillOrigin90;
+        fillClockwise: boolean;
+        fillAmount: number;
         texture: egret.Texture;
         protected createDisplayObject(): void;
+        protected setupFill(): void;
+        removeFromParent(): void;
         dispose(): void;
         constructFromResource(): void;
         protected handleXYChanged(): void;
-        protected handleSizeChanged(): void;
-        setup_beforeAdd(xml: any): void;
+        setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
     }
 }
 declare module fairygui {
@@ -1168,8 +1360,9 @@ declare module fairygui {
         color: number;
         titleFontSize: number;
         editable: boolean;
-        protected constructFromXML(xml: any): void;
-        setup_afterAdd(xml: any): void;
+        getTextField(): GTextField;
+        protected constructExtension(buffer: ByteBuffer): void;
+        setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
     }
 }
 declare module fairygui {
@@ -1210,7 +1403,6 @@ declare module fairygui {
         private _virtualItems;
         private _eventLocked;
         private itemInfoVer;
-        private enterCounter;
         constructor();
         dispose(): void;
         layout: ListLayoutType;
@@ -1278,12 +1470,12 @@ declare module fairygui {
         private handleArchOrder2();
         private handleAlign(contentWidth, contentHeight);
         protected updateBounds(): void;
-        setup_beforeAdd(xml: any): void;
-        setup_afterAdd(xml: any): void;
+        setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
+        setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
     }
 }
 declare module fairygui {
-    class UIContainer extends egret.DisplayObjectContainer {
+    class UISprite extends egret.Sprite {
         private _hitArea;
         constructor();
         hitArea: egret.Rectangle;
@@ -1292,16 +1484,13 @@ declare module fairygui {
 }
 declare module fairygui {
     class GLoader extends GObject {
-        private _gearAnimation;
-        private _gearColor;
         private _url;
         private _align;
         private _verticalAlign;
         private _autoSize;
         private _fill;
+        private _shrinkOnly;
         private _showErrorSign;
-        private _playing;
-        private _frame;
         private _color;
         private _contentItem;
         private _contentSourceWidth;
@@ -1311,6 +1500,7 @@ declare module fairygui {
         private _container;
         private _content;
         private _errorSign;
+        private _content2;
         private _updatingLayout;
         private static _errorSignPool;
         constructor();
@@ -1321,17 +1511,20 @@ declare module fairygui {
         align: AlignType;
         verticalAlign: VertAlignType;
         fill: LoaderFillType;
+        shrinkOnly: boolean;
         autoSize: boolean;
         playing: boolean;
         frame: number;
+        timeScale: number;
+        advance(timeInMiniseconds: number): void;
         color: number;
         private applyColor();
         showErrorSign: boolean;
-        readonly content: egret.Bitmap | fairygui.MovieClip;
+        readonly content: MovieClip;
+        readonly component: GComponent;
         texture: egret.Texture;
         protected loadContent(): void;
         protected loadFromPackage(itemURL: string): void;
-        private switchToMovieMode(value);
         protected loadExternal(): void;
         protected freeExternal(texture: egret.Texture): void;
         protected onExternalLoadSuccess(texture: egret.Texture): void;
@@ -1342,7 +1535,7 @@ declare module fairygui {
         private updateLayout();
         private clearContent();
         protected handleSizeChanged(): void;
-        setup_beforeAdd(xml: any): void;
+        setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
     }
 }
 declare module fairygui {
@@ -1353,9 +1546,13 @@ declare module fairygui {
         protected createDisplayObject(): void;
         playing: boolean;
         frame: number;
+        timeScale: number;
+        rewind(): void;
+        syncStatus(anotherMc: GMovieClip): void;
+        advance(timeInMiniseconds: number): void;
         setPlaySettings(start?: number, end?: number, times?: number, endAt?: number, endCallback?: Function, callbackObj?: any): void;
         constructFromResource(): void;
-        setup_beforeAdd(xml: any): void;
+        setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
     }
 }
 declare module fairygui {
@@ -1374,28 +1571,25 @@ declare module fairygui {
         private _barMaxHeightDelta;
         private _barStartX;
         private _barStartY;
-        private _tweener;
-        private _tweenValue;
-        private static easeLinear;
         constructor();
         titleType: ProgressTitleType;
         max: number;
         value: number;
-        tweenValue(value: number, duration: number): egret.Tween;
-        private onUpdateTween();
+        tweenValue(value: number, duration: number): GTweener;
         update(newValue: number): void;
-        protected constructFromXML(xml: any): void;
+        protected constructExtension(buffer: ByteBuffer): void;
         protected handleSizeChanged(): void;
-        setup_afterAdd(xml: any): void;
-        dispose(): void;
+        setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
     }
 }
 declare module fairygui {
-    class UISprite extends egret.Sprite {
-        private _hitArea;
+    class BitmapFont {
+        id: string;
+        size: number;
+        ttf: boolean;
+        glyphs: any;
+        resizable: boolean;
         constructor();
-        hitArea: egret.Rectangle;
-        $hitTest(stageX: number, stageY: number): egret.DisplayObject;
     }
 }
 declare module fairygui {
@@ -1467,7 +1661,6 @@ declare module fairygui {
         top: number;
         bottom: number;
         constructor();
-        parse(str: string): void;
         copy(source: Margin): void;
     }
 }
@@ -1480,7 +1673,6 @@ declare module fairygui {
         private _lastTime;
         static deltaTime: number;
         static time: number;
-        static workCount: number;
         static inst: GTimers;
         private static FPS24;
         constructor();
@@ -1511,7 +1703,7 @@ declare module fairygui {
         displayPerc: number;
         scrollPerc: number;
         readonly minSize: number;
-        protected constructFromXML(xml: any): void;
+        protected constructExtension(buffer: ByteBuffer): void;
         private __gripMouseDown(evt);
         private static sScrollbarHelperPoint;
         private __gripMouseMove(evt);
@@ -1547,9 +1739,9 @@ declare module fairygui {
         value: number;
         update(): void;
         private updateWidthPercent(percent);
-        protected constructFromXML(xml: any): void;
+        protected constructExtension(buffer: ByteBuffer): void;
         protected handleSizeChanged(): void;
-        setup_afterAdd(xml: any): void;
+        setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
         private __gripMouseDown(evt);
         private static sSilderHelperPoint;
         private __gripMouseMove(evt);
@@ -1573,8 +1765,8 @@ declare module fairygui {
         private updateVertAlign();
         protected updateTextFieldText(): void;
         protected handleSizeChanged(): void;
-        setup_beforeAdd(xml: any): void;
-        setup_afterAdd(xml: any): void;
+        setup_beforeAdd(buffer: ByteBuffer, beginPos: number): void;
+        setup_afterAdd(buffer: ByteBuffer, beginPos: number): void;
         private __textChanged(evt);
         private __focusIn(evt);
         private __focusOut(evt);
@@ -1667,10 +1859,8 @@ declare module fairygui {
         private _items;
         handling: GObject;
         sizeDirty: boolean;
-        private static RELATION_NAMES;
         constructor(owner: GObject);
         add(target: GObject, relationType: number, usePercent?: boolean): void;
-        addItems(target: GObject, sidePairs: string): void;
         remove(target: GObject, relationType?: number): void;
         contains(target: GObject): boolean;
         clearFor(target: GObject): void;
@@ -1680,7 +1870,7 @@ declare module fairygui {
         onOwnerSizeChanged(dWidth: number, dHeight: number, applyPivot: boolean): void;
         ensureRelationsSizeCorrect(): void;
         readonly empty: boolean;
-        setup(xml: any): void;
+        setup(buffer: ByteBuffer, parentToChild: boolean): void;
     }
 }
 declare module fairygui {
@@ -1752,7 +1942,8 @@ declare module fairygui {
         private static sHelperRect;
         private static sEndPos;
         private static sOldChange;
-        constructor(owner: GComponent, scrollType: number, scrollBarMargin: Margin, scrollBarDisplay: number, flags: number, vtScrollBarRes: string, hzScrollBarRes: string, headerRes: string, footerRes: string);
+        constructor(owner: GComponent);
+        setup(buffer: ByteBuffer): void;
         dispose(): void;
         readonly owner: GComponent;
         readonly hzScrollBar: GScrollBar;
@@ -1778,6 +1969,8 @@ declare module fairygui {
         viewHeight: number;
         currentPageX: number;
         currentPageY: number;
+        setCurrentPageX(value: number, ani: boolean): void;
+        setCurrentPageY(value: number, ani: boolean): void;
         readonly isBottomMost: boolean;
         readonly isRightMost: boolean;
         pageController: Controller;
@@ -1867,32 +2060,23 @@ declare module fairygui {
         constructor();
         static setPackageItemExtension(url: string, type: any): void;
         static setLoaderExtension(type: any): void;
-        static $resolvePackageItemExtension(pi: PackageItem): void;
+        static resolvePackageItemExtension(pi: PackageItem): void;
         static newObject(pi: PackageItem): GObject;
-        static newObject2(type: string): GObject;
+        static newObject2(type: ObjectType): GObject;
     }
 }
 declare module fairygui {
     class UIPackage {
         private _id;
         private _name;
-        private _basePath;
         private _items;
         private _itemsById;
         private _itemsByName;
-        private _resKey;
-        private _resData;
         private _customId;
         private _sprites;
         static _constructing: number;
         private static _packageInstById;
         private static _packageInstByName;
-        private static _bitmapFonts;
-        private static _stringsSource;
-        private static sep0;
-        private static sep1;
-        private static sep2;
-        private static sep3;
         constructor();
         static getById(id: string): UIPackage;
         static getByName(name: string): UIPackage;
@@ -1903,12 +2087,8 @@ declare module fairygui {
         static getItemURL(pkgName: string, resName: string): string;
         static getItemByURL(url: string): PackageItem;
         static normalizeURL(url: string): string;
-        static getBitmapFontByURL(url: string): BitmapFont;
         static setStringsSource(source: string): void;
-        private create(resKey, descData);
-        private loadPackage(descData);
-        private decompressPackage(buf);
-        private decodeUncompressed(buf);
+        private loadPackage(buffer, resKey);
         dispose(): void;
         readonly id: string;
         readonly name: string;
@@ -1919,11 +2099,6 @@ declare module fairygui {
         getItemByName(resName: string): PackageItem;
         getItemAssetByName(resName: string): any;
         getItemAsset(item: PackageItem): any;
-        private loadComponentChildren(item);
-        private getDesc(fn);
-        private translateComponent(item);
-        private createSpriteTexture(sprite);
-        private createSubTexture(atlasTexture, uvRect);
         private loadMovieClip(item);
         private loadFont(item);
     }
@@ -2009,6 +2184,34 @@ declare module fairygui {
         cancel(): void;
         private internalCreateObject(item);
         private collectComponentChildren(item);
+        private collectListChildren(buffer);
         private run();
+    }
+}
+declare module fairygui {
+    class TranslationHelper {
+        static strings: Object;
+        static loadFromXML(source: string): void;
+        static translateComponent(item: PackageItem): void;
+    }
+}
+declare module fairygui {
+    class ByteBuffer extends egret.ByteArray {
+        stringTable: Array<string>;
+        version: number;
+        constructor(buffer?: ArrayBuffer | Uint8Array, bufferExtSize?: number);
+        skip(count: number): void;
+        readBool(): boolean;
+        readS(): string;
+        writeS(value: string): void;
+        readColor(hasAlpha?: boolean): number;
+        readChar(): string;
+        readBuffer(): ByteBuffer;
+        seek(indexTablePos: number, blockIndex: number): boolean;
+    }
+}
+declare module fairygui {
+    class GraphicsHelper {
+        static fillImage(method: FillMethod, amount: number, origin: FillOrigin | FillOrigin90, clockwise: boolean, graphics: egret.Graphics, width: number, height: number): void;
     }
 }

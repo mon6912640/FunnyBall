@@ -21,6 +21,8 @@ class MainUIView extends monkey.BaseView {
         super.initView();
         this.view = main.UI_MainUIGUI.createInstance();
 
+        console.log(this.view.m_btnStop);
+
         this.view.setSize(fairygui.GRoot.inst.width, fairygui.GRoot.inst.height);
     }
 
@@ -52,22 +54,25 @@ class MainUIView extends monkey.BaseView {
 
         this._quad = new Quadtree(0, new egret.Rectangle(0, 0, this._stageW, this._stageH));
 
-        this.view.addEventListener(egret.Event.ENTER_FRAME, this.onEnterFrameHandler, this);
-
-        monkey.SimpleTimer.ins().addTimer(this.onTimer, this, 3000, 1)
+        this.registerEvent(true);
     }
 
     private onTimer()
     {
+    }
+    
+    //================================ override method ==================================
+    //================================= private method ==================================
+    private registerEvent(pFlag:boolean)
+    {
+        monkey.EventUtil.register(pFlag, this.view, egret.Event.ENTER_FRAME, this.onEnterFrameHandler, this);
         monkey.EventUtil.register(true, this.view.m_btnStop, egret.TouchEvent.TOUCH_TAP, this.onClickHandler, this);
     }
 
-    //================================ override method ==================================
-    //================================= private method ==================================
     private _pause = false;
     private onClickHandler(e:egret.TouchEvent)
     {
-        this._pause != this._pause;
+        this._pause = !this._pause;
     }
 
     private getInitRandomPos(pObjW:number, pStageW:number):number
@@ -88,7 +93,7 @@ class MainUIView extends monkey.BaseView {
     private _minHitCount:number;
     private _totalHitCount:number = 0;
     private _hitTime:number = 0;
-    private _averageCount = 0;
+    private _avgCount = 0;
     private onEnterFrameHandler(e:egret.Event)
     {
         if(this._pause)
@@ -143,7 +148,7 @@ class MainUIView extends monkey.BaseView {
         //算法性能量化数据
         this._totalHitCount += t_hitCount;
         this._hitTime++;
-        this._averageCount = ~~(this._totalHitCount/this._hitTime);
+        this._avgCount = ~~(this._totalHitCount/this._hitTime);
 
         if(this._maxHitCount === undefined || t_hitCount > this._maxHitCount)
             this._maxHitCount = t_hitCount;
@@ -151,7 +156,7 @@ class MainUIView extends monkey.BaseView {
             this._minHitCount = t_hitCount;
 
         // monkey.TimeUtil.showMarkTs("用时");
-        console.log("碰撞检测次数="+t_hitCount, "max="+this._maxHitCount, "min="+this._minHitCount, "avg="+this._averageCount);
+        console.log("碰撞检测次数="+t_hitCount, "max="+this._maxHitCount, "min="+this._minHitCount, "avg="+this._avgCount);
         
     }
 }

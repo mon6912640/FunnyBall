@@ -20,8 +20,8 @@ module main {
 		protected constructFromXML(xml: any): void {
 			super.constructFromXML(xml);
 
-			this.m_bg = <fairygui.GGraph><any>(this.getChildAt(0));
-			this.m_btnStop = <fairygui.GButton><any>(this.getChildAt(3));
+			this.m_bg = <fairygui.GGraph><any>(this.getChild("bg"));
+			this.m_btnStop = <fairygui.GButton><any>(this.getChild("btnStop"));
 		}
 	}
 }

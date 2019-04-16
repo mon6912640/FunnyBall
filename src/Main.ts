@@ -34,8 +34,9 @@ class Main extends egret.DisplayObjectContainer {
         // t_entry.start();
 
         UIBindMgr.setup();
+        fairygui.UIObjectFactory.setLoaderExtension(SLoader);
         
-        fairygui.UIPackage.addPackage("main");
+        FguiMgr.ins().addPackage("main");
         this.addChild(fairygui.GRoot.inst.displayObject);
 
         let t_mainUI = new MainUIView();
@@ -45,26 +46,13 @@ class Main extends egret.DisplayObjectContainer {
         // await platform.login();
         // const userInfo = await platform.getUserInfo();
         // console.log(userInfo);
-
-        let t_num1 = 0b1;
-        let t_num2 = 0b10;
-        let t_num3 = 0b100;
-
-        let t_result = 0;
-        t_result |= t_num1;
-        t_result |= t_num1;
-        console.log(t_result.toString(2));
-        console.log((t_result&t_num1) == t_num1);
-        console.log((t_result&t_num2) == t_num2);
-        console.log((t_result&t_num3) == t_num3);
-        
     }
 
     private async loadResource() {
         try {
             const loadingView = new LoadingUI();
             this.stage.addChild(loadingView);
-            await RES.loadConfig("resource/default.res.json", "resource/");
+            await RES.loadConfig("resource/default.res.json" + "?v="+Math.random(), "resource/");
             await RES.loadGroup("preload", 0, loadingView);
             this.stage.removeChild(loadingView);
         }
