@@ -13,6 +13,9 @@ class UIBindMgr {
         //处理FairyGui生成的绑定文件
         main.mainBinder.bindAll();
 
+        //---------- 扩展GLoader ------------
+        fairygui.UIObjectFactory.setLoaderExtension(SLoader);
+
         //----------------------------处理需要自定义重写的组件-----------------------------------
         fairygui.UIObjectFactory.setPackageItemExtension(main.UI_BaseItemGUI.URL, BaseItem);
     }

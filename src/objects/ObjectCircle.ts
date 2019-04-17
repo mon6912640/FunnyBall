@@ -16,17 +16,14 @@ class ObjectCircle extends BaseObject {
     }
 
     //=============================== gettter and setter ================================
-    public set id(value:number)
-    {
-        this._id = value;
-        if(this.view)
-            this.view.m_tfId.text = value+"";
-    }
     //======================================= API =======================================
     protected initType()
     {
         super.initType();
         this.view = BaseItem.createInstance() as BaseItem;
+
+        if(this.view)
+            this.view.m_tfId.text = this.id+"";
 
         this.handleHitTest(false);
     }

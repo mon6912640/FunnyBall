@@ -10,9 +10,8 @@ class Quadtree {
     {
         let t_obj = this._pool.pop();
         if(!t_obj)
-            t_obj = new Quadtree(pLevel, pBounds);
-        t_obj._level = pLevel;
-        t_obj._bounds = pBounds;
+            t_obj = new Quadtree();
+        t_obj.init(pLevel, pBounds);
         return t_obj;
     }
 
@@ -27,18 +26,26 @@ class Quadtree {
 
 
     /** 节点深度 */
-    private _level:number;
+    public level:number;
     /** 象限index */
-    private _nodeIndex = -1;
+    public nodeIndex = -1;
     /** 物体对象数组 */
     private _objectList:QObject[];
     /** 区域边界 */
     private _bounds:egret.Rectangle;
     /** 四个子节点数组 */
     private _nodeList:Quadtree[];
+    /** 父节点 */
+    public parent:Quadtree;
 
-    constructor(pLevel:number, pBounds:egret.Rectangle) {
-        this._level = pLevel;
+    constructor() {
+    }
+
+    //=============================== gettter and setter ================================
+    //======================================= API =======================================
+    public init(pLevel:number, pBounds:egret.Rectangle)
+    {
+        this.level = pLevel;
         this._bounds = pBounds;
         if(!this._objectList)
             this._objectList = [];
@@ -46,17 +53,16 @@ class Quadtree {
             this._nodeList = [];
     }
 
-    //=============================== gettter and setter ================================
-    //======================================= API =======================================
     public recycle()
     {
-        this._level = 0;
-        this._nodeIndex = -1;
+        this.level = 0;
+        this.nodeIndex = -1;
         if(this._bounds)
         {
             egret.Rectangle.release(this._bounds);
             this._bounds = null;
         }
+        this.parent = null;
     }
 
     /**
@@ -65,7 +71,12 @@ class Quadtree {
      */
     public clear()
     {
-        this._objectList.length = 0; //清空对象数据
+        //清空对象数据
+        for(let v of this._objectList)
+        {
+            v.node = null;
+        }
+        this._objectList.length = 0; 
 
         for(let i = this._nodeList.length-1; i>=0; i--)
         {
@@ -101,10 +112,13 @@ class Quadtree {
 
         //如果还没分裂或者插入到子节点失败，则留给父节点
         this._objectList.push(pObj);
+        pObj.level = this.level;
+        pObj.index = this.nodeIndex;
+        pObj.node = this;
 
         //
         if(this._objectList.length > QuadtreeEnum.MAX_OBJECTS_COUNT 
-            && this._level < QuadtreeEnum.MAX_LEVEL)
+            && this.level < QuadtreeEnum.MAX_LEVEL)
         {
             if(this._nodeList.length == 0)
                 this.split();
@@ -160,14 +174,18 @@ class Quadtree {
 
         let t_tempRect:egret.Rectangle;
 
-        this._nodeList[0] = Quadtree.create(this._level+1, egret.Rectangle.create().setTo(t_x+t_subW, t_y, t_subW, t_subH));
-        this._nodeList[0]._nodeIndex = 0;
-        this._nodeList[1] = Quadtree.create(this._level+1, egret.Rectangle.create().setTo(t_x, t_y, t_subW, t_subH));
-        this._nodeList[1]._nodeIndex = 1;
-        this._nodeList[2] = Quadtree.create(this._level+1, egret.Rectangle.create().setTo(t_x, t_y+t_subH, t_subW, t_subH));
-        this._nodeList[2]._nodeIndex = 2;
-        this._nodeList[3] = Quadtree.create(this._level+1, egret.Rectangle.create().setTo(t_x+t_subW, t_y+t_subH, t_subW, t_subH));
-        this._nodeList[3]._nodeIndex = 3;
+        this._nodeList[0] = Quadtree.create(this.level+1, egret.Rectangle.create().setTo(t_x+t_subW, t_y, t_subW, t_subH));
+        this._nodeList[0].nodeIndex = 0;
+        this._nodeList[0].parent = this;
+        this._nodeList[1] = Quadtree.create(this.level+1, egret.Rectangle.create().setTo(t_x, t_y, t_subW, t_subH));
+        this._nodeList[1].nodeIndex = 1;
+        this._nodeList[1].parent = this;
+        this._nodeList[2] = Quadtree.create(this.level+1, egret.Rectangle.create().setTo(t_x, t_y+t_subH, t_subW, t_subH));
+        this._nodeList[2].nodeIndex = 2;
+        this._nodeList[2].parent = this;
+        this._nodeList[3] = Quadtree.create(this.level+1, egret.Rectangle.create().setTo(t_x+t_subW, t_y+t_subH, t_subW, t_subH));
+        this._nodeList[3].nodeIndex = 3;
+        this._nodeList[3].parent = this;
     }
 
     /**

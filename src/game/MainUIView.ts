@@ -9,6 +9,7 @@ class MainUIView extends monkey.BaseView {
     private _stageH: number = 0;
 
     private _objectList:BaseObject[] = [];
+    private _objectMap:{[id:number]:BaseObject} = {};
     private _quad:Quadtree;
 
     constructor() {
@@ -21,9 +22,25 @@ class MainUIView extends monkey.BaseView {
         super.initView();
         this.view = main.UI_MainUIGUI.createInstance();
 
-        console.log(this.view.m_btnStop);
-
         this.view.setSize(fairygui.GRoot.inst.width, fairygui.GRoot.inst.height);
+
+        let t_graphics = this.view.m_bg.graphics;
+        let t_w = this.view.width;
+        let t_h = this.view.height;
+        t_graphics.lineStyle(1, 0xffffff);
+        t_graphics.moveTo(t_w/2, 0);
+        t_graphics.lineTo(t_w/2, t_h);
+        t_graphics.moveTo(t_w/4, 0);
+        t_graphics.lineTo(t_w/4, t_h);
+        t_graphics.moveTo(t_w*3/4, 0);
+        t_graphics.lineTo(t_w*3/4, t_h);
+
+        t_graphics.moveTo(0, t_h/2);
+        t_graphics.lineTo(t_w, t_h/2);
+        t_graphics.moveTo(0, t_h/4);
+        t_graphics.lineTo(t_w, t_h/4);
+        t_graphics.moveTo(0, t_h*3/4);
+        t_graphics.lineTo(t_w, t_h*3/4);
     }
 
     public start()
@@ -34,15 +51,11 @@ class MainUIView extends monkey.BaseView {
         for(let i = 0; i<200; i++)
         {
             let t_obj = new ObjectCircle();
-            t_obj.initView(50, 50, this._stageW, this._stageH);
             t_obj.id = i+1;
+            t_obj.initView(50, 50, this._stageW, this._stageH);
             this.view.addChild(t_obj.view);
             t_obj.x = this.getInitRandomPos(t_obj.width, this._stageW);
-            if(t_obj.x > (this._stageW-t_obj.width))
-                console.log("fuckx", t_obj.x);
             t_obj.y = this.getInitRandomPos(t_obj.height, this._stageH);
-            if(t_obj.y > (this._stageH-t_obj.height))
-                console.log("fucky", t_obj.y);
 
             // t_obj.speed = 10+monkey.MathUtil.RandomInt(10);
             // t_obj.speed = 5+monkey.MathUtil.RandomInt(5);
@@ -50,15 +63,12 @@ class MainUIView extends monkey.BaseView {
             t_obj.angle = this.getAngle();
 
             this._objectList.push(t_obj);
+            this._objectMap[t_obj.id] = t_obj;
         }
 
-        this._quad = new Quadtree(0, new egret.Rectangle(0, 0, this._stageW, this._stageH));
+        this._quad = Quadtree.create(0, new egret.Rectangle(0, 0, this._stageW, this._stageH));
 
         this.registerEvent(true);
-    }
-
-    private onTimer()
-    {
     }
     
     //================================ override method ==================================
@@ -73,6 +83,8 @@ class MainUIView extends monkey.BaseView {
     private onClickHandler(e:egret.TouchEvent)
     {
         this._pause = !this._pause;
+        if(!this._pause)
+            this._inDebug = false;
     }
 
     private getInitRandomPos(pObjW:number, pStageW:number):number
@@ -88,16 +100,28 @@ class MainUIView extends monkey.BaseView {
         return t_angle;
     }
 
+    private getObjById(pId:number):BaseObject
+    {
+        return this._objectMap[pId]
+    }
+
     //===================================== Handler =====================================
     private _maxHitCount:number;
     private _minHitCount:number;
     private _totalHitCount:number = 0;
     private _hitTime:number = 0;
     private _avgCount = 0;
+    private _inDebug = false;
     private onEnterFrameHandler(e:egret.Event)
     {
         if(this._pause)
+        {
+            if(!this._inDebug)
+            {
+                this._inDebug = true;
+            }
             return;
+        }
         // monkey.TimeUtil.markTs();
         let t_hitCount = 0;
         this._quad.clear();
@@ -116,8 +140,8 @@ class MainUIView extends monkey.BaseView {
         let t_resultList:BaseObject[] = [];
         for(let v of this._objectList)
         {
-            if(v.hitTestFlag)
-                continue;
+            // if(v.hitTestFlag)
+            //     continue;
             t_resultList.length = 0;
             this._quad.retrieve(v, t_resultList); //检索对象所在区间的对象列表
             // console.log("检索对象数量="+t_resultList.length);
@@ -156,7 +180,6 @@ class MainUIView extends monkey.BaseView {
             this._minHitCount = t_hitCount;
 
         // monkey.TimeUtil.showMarkTs("用时");
-        console.log("碰撞检测次数="+t_hitCount, "max="+this._maxHitCount, "min="+this._minHitCount, "avg="+this._avgCount);
-        
+        // console.log("碰撞检测次数="+t_hitCount, "max="+this._maxHitCount, "min="+this._minHitCount, "avg="+this._avgCount);
     }
 }

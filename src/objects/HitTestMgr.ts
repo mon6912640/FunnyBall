@@ -44,6 +44,10 @@ class HitTestMgr {
     private static hitTestCircle2(pObj1:ObjectCircle, pObj2:ObjectCircle):boolean
     {
         let t_dis = (pObj1.width>>1) + (pObj2.width>>1);
+        if(Math.abs(pObj1.x - pObj2.x) > t_dis)
+            return false;
+        if(Math.abs(pObj1.y - pObj2.y) > t_dis)
+            return false;
         if(Math.sqrt(Math.pow(pObj1.x - pObj2.x, 2) + Math.pow(pObj1.y - pObj2.y, 2)) < t_dis)
             return true;
         else

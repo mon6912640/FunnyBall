@@ -4,6 +4,9 @@
  * @date: 2018-05-06 14:28:44 
  */
 class BaseObject extends egret.HashObject implements QObject{
+    node: Quadtree;
+    level: number;
+    index: number;
 
     protected _width: number = 0;
     protected _height: number = 0;
@@ -28,7 +31,7 @@ class BaseObject extends egret.HashObject implements QObject{
     /** 是否检测过碰撞（下次检测前会被重置） */
     public hitTestFlag = false;
     /** 曾经碰撞检测过的对象映射表（下次检测前会被重置） */
-    protected _checkedMap:{[hashCode:number]:boolean} = {};
+    protected _checkedMap:{[id:number]:any} = {};
 
     constructor() {
         super();
@@ -41,6 +44,30 @@ class BaseObject extends egret.HashObject implements QObject{
     }
     public set id(value: number) {
         this._id = value;
+    }
+
+    public get qid():string
+    {
+        let t_qid:string;
+        if(this.node)
+        {
+            let t_nodeLinkList:Quadtree[] = [];
+            let t_node:Quadtree = this.node;
+            do {
+                t_nodeLinkList.push(t_node);
+                t_node = t_node.parent;
+            } while (t_node);
+
+            let t_index = 0;
+            for(let i = t_nodeLinkList.length-1; i>=0; i--, t_index++)
+            {
+                if(t_index == 0)
+                    t_qid = t_nodeLinkList[i].nodeIndex.toString();
+                else
+                    t_qid += "_"+t_nodeLinkList[i].nodeIndex;
+            }
+        }
+        return t_qid;
     }
 
     protected _radian:number = 0;
@@ -188,12 +215,12 @@ class BaseObject extends egret.HashObject implements QObject{
 
     public markCheckHittest(pObj:BaseObject)
     {
-        this._checkedMap[pObj.hashCode] = true;
+        this._checkedMap[pObj.id] = {"qid":pObj.qid, "index":pObj.index, "level":pObj.level};
     }
 
     public checkHadHitTest(pObj:BaseObject):boolean
     {
-        return this._checkedMap[pObj.hashCode];
+        return this._checkedMap[pObj.id];
     }
 
     /** 重置碰撞检测的状态 */
