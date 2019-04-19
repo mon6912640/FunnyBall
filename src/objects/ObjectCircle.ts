@@ -67,36 +67,6 @@ class ObjectCircle extends BaseObject {
         }
     }
 
-    public getIndex(pBounds:egret.Rectangle):number
-    {
-        let t_index = -1;
-
-        //水平和竖直中线
-        let t_xMidLine = pBounds.x + (pBounds.width >> 1);
-        let t_yMidLine = pBounds.y + (pBounds.height >> 1);
-
-        //物体完全位于上面两个象限区域
-        let t_isInTop = (this.y+this.height/2 < t_yMidLine);
-        //物体完全位于下面两个象限区域
-        let t_isInBottom = (this.y-this.height/2 > t_yMidLine);
-
-        if(this.x+this.width/2 < t_xMidLine)
-        {
-            if(t_isInTop)
-                t_index = 1; //第二象限
-            else if(t_isInBottom)
-                t_index = 2; //第三象限
-        }
-        else if(this.x-this.width/2 > t_xMidLine)
-        {
-            if(t_isInTop)
-                t_index = 0; //第一象限
-            else if(t_isInBottom)
-                t_index = 3; //第四象限
-        }
-
-        return t_index;
-    }
     //================================ override method ==================================
     //================================= private method ==================================
     //===================================== Handler =====================================

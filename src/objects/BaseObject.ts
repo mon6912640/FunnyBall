@@ -28,6 +28,9 @@ class BaseObject extends egret.HashObject implements QObject{
     /** y轴速度改变标识 */
     protected _speedYChange:boolean = false;
 
+    protected _xChange = false;
+    protected _yChange = false;
+
     /** 是否检测过碰撞（下次检测前会被重置） */
     public hitTestFlag = false;
     /** 曾经碰撞检测过的对象映射表（下次检测前会被重置） */
@@ -164,7 +167,10 @@ class BaseObject extends egret.HashObject implements QObject{
         return this._x;
     }
     public set x(value: number) {
+        if(this._x == value)
+            return;
         this._x = value;
+        this._xChange = true;
         if(this.view)
             this.view.x = value;
     }
@@ -174,11 +180,44 @@ class BaseObject extends egret.HashObject implements QObject{
         return this._y;
     }
     public set y(value: number) {
+        if(this._y == value)
+            return;
         this._y = value;
+        this._yChange = true;
         if(this.view)
             this.view.y = value;
     }
 
+    protected _bounds:egret.Rectangle;
+    public get bounds():egret.Rectangle
+    {
+        if(!this._bounds)
+        {
+            let t_container = this.view.displayListContainer;
+            if(t_container)
+            {
+                this._bounds = egret.Rectangle.create();
+                this._bounds.setTo(t_container.x, t_container.y, t_container.width, t_container.height);
+            }
+        }
+
+        if(this._bounds)
+        {
+            if(this._xChange)
+            {
+                this._bounds.x = this.view.displayListContainer.x;
+                this._xChange = false;
+            }
+
+            if(this._yChange)
+            {
+                this._bounds.y = this.view.displayListContainer.y;
+                this._yChange = false;
+            }
+        }
+        return this._bounds;
+    }
+    
     //======================================= API =======================================
     public initView(pW: number, pH: number, pEdgeW: number, pEdgeH: number) {
         this.initType();
@@ -190,10 +229,6 @@ class BaseObject extends egret.HashObject implements QObject{
 
         this._edgeW = pEdgeW;
         this._edgeH = pEdgeH;
-
-        // this.graphics.beginFill(0);
-        // this.graphics.drawRect(-this.width/2, -this.height/2, this.width, this.height);
-        // this.graphics.endFill();
     }
 
     /**
@@ -263,28 +298,32 @@ class BaseObject extends egret.HashObject implements QObject{
     {
         let t_index = -1;
 
-        //水平和竖直中线
-        let t_xMidLine = pBounds.x + (pBounds.width >> 1);
-        let t_yMidLine = pBounds.y + (pBounds.height >> 1);
-
-        //物体完全位于上面两个象限区域
-        let t_isInTop = (this.y+this.height < t_yMidLine);
-        //物体完全位于下面两个象限区域
-        let t_isInBottom = (this.y > t_yMidLine);
-
-        if(this.x+this.width < t_xMidLine)
+        let t_myBouds = this.bounds;
+        if(t_myBouds)
         {
-            if(t_isInTop)
-                t_index = 1; //第二象限
-            else if(t_isInBottom)
-                t_index = 2; //第三象限
-        }
-        else if(this.x > t_xMidLine)
-        {
-            if(t_isInTop)
-                t_index = 0; //第一象限
-            else if(t_isInBottom)
-                t_index = 3; //第四象限
+            //水平和竖直中线
+            let t_xMidLine = pBounds.x + (pBounds.width >> 1);
+            let t_yMidLine = pBounds.y + (pBounds.height >> 1);
+    
+            //物体完全位于上面两个象限区域
+            let t_isInTop = (t_myBouds.bottom < t_yMidLine);
+            //物体完全位于下面两个象限区域
+            let t_isInBottom = (t_myBouds.top > t_yMidLine);
+    
+            if(t_myBouds.right < t_xMidLine)
+            {
+                if(t_isInTop)
+                    t_index = 1; //第二象限
+                else if(t_isInBottom)
+                    t_index = 2; //第三象限
+            }
+            else if(t_myBouds.left > t_xMidLine)
+            {
+                if(t_isInTop)
+                    t_index = 0; //第一象限
+                else if(t_isInBottom)
+                    t_index = 3; //第四象限
+            }
         }
 
         return t_index;
