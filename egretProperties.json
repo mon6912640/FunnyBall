@@ -27,6 +27,10 @@
 		{
 			"name": "fairygui",
 			"path": "./libs/fairygui"
+		},
+		{
+			"name": "rawinflate",
+			"path": "./libs/rawinflate"
 		}
 	]
 }

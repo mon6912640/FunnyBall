@@ -1,6 +1,6 @@
 {
 	"groups":[{
-			"keys":"main,main_atlas0",
+			"keys":"main,main_atlas0,0config_zlib,config_zip,0config_zlib64",
 			"name":"preload"
 		}],
 	"resources":[
@@ -13,6 +13,21 @@
 			"name":"main_atlas0",
 			"type":"image",
 			"url":"assets/fgui/main_atlas0.png"
+		},
+		{
+			"name":"0config_zlib",
+			"type":"bin",
+			"url":"assets/config/0config.zlib"
+		},
+		{
+			"name":"config_zip",
+			"type":"bin",
+			"url":"assets/config/config.zip"
+		},
+		{
+			"name":"0config_zlib64",
+			"type":"bin",
+			"url":"assets/config/0config.zlib64"
 		}
 	]
 }
