@@ -1,4 +1,5 @@
 bin-debug/
+__pycache__
 .idea/
 .vscode/
 temp/

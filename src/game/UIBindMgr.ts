@@ -17,9 +17,15 @@ class UIBindMgr {
         fairygui.UIObjectFactory.setLoaderExtension(SLoader);
 
         //----------------------------处理需要自定义重写的组件-----------------------------------
-        fairygui.UIObjectFactory.setPackageItemExtension(main.UI_BaseItemGUI.URL, BaseItem);
+        let t = this;
+        t.setCustomUI(main.UI_BaseItemGUI.URL, BaseItem);
     }
+
     //======================================= API =======================================
+    public static setCustomUI(pUrl:string, pCls:any)
+    {
+        fairygui.UIObjectFactory.setPackageItemExtension(pUrl, pCls);
+    }
     //================================ override method ==================================
     //================================= private method ==================================
     //===================================== Handler =====================================

@@ -4,21 +4,17 @@ module monkey {
      * @author: lujiahao 
      * @date: 2018-03-29 16:03:06 
      */
-    export class EventUtil 
-    {
+    export class EventUtil {
         public constructor() {
         }
 
-        public static register(pFlag:boolean, pTarget:egret.EventDispatcher, pType:string, pHandler:Function, pThisObj:any, useCapture?:boolean, priority?:number)
-        {
-            if(!pTarget)
+        public static register(pFlag: boolean, pTarget: egret.EventDispatcher, pType: string, pHandler: Function, pThisObj: any, useCapture?: boolean, priority?: number) {
+            if (!pTarget)
                 return;
-            if(pFlag)
-            {
+            if (pFlag) {
                 pTarget.addEventListener(pType, pHandler, pThisObj, useCapture, priority);
             }
-            else
-            {
+            else {
                 pTarget.removeEventListener(pType, pHandler, pThisObj, useCapture);
             }
         }

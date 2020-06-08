@@ -1,33 +1,40 @@
 {
-	"groups":[{
-			"keys":"main,main_atlas0,0config_zlib,config_zip,0config_zlib64",
-			"name":"preload"
-		}],
-	"resources":[
+	"groups": [
 		{
-			"name":"main",
-			"type":"bin",
-			"url":"assets/fgui/main.bin"
+			"keys": "main,main_atlas0,0config_zip",
+			"name": "preload"
+		}
+	],
+	"resources": [
+		{
+			"name": "main",
+			"type": "bin",
+			"url": "assets/fgui/main.bin"
 		},
 		{
-			"name":"main_atlas0",
-			"type":"image",
-			"url":"assets/fgui/main_atlas0.png"
+			"name": "main_atlas0",
+			"type": "image",
+			"url": "assets/fgui/main_atlas0.png"
 		},
 		{
-			"name":"0config_zlib",
-			"type":"bin",
-			"url":"assets/config/0config.zlib"
+			"name": "0config_zip",
+			"type": "bin",
+			"url": "assets/config/0config.zip"
 		},
 		{
-			"name":"config_zip",
-			"type":"bin",
-			"url":"assets/config/config.zip"
+			"name": "1_mp3",
+			"type": "sound",
+			"url": "assets/sound/bgm/1.mp3"
 		},
 		{
-			"name":"0config_zlib64",
-			"type":"bin",
-			"url":"assets/config/0config.zlib64"
+			"name": "2_mp3",
+			"type": "sound",
+			"url": "assets/sound/bgm/2.mp3"
+		},
+		{
+			"name": "baiganjiu_mp3",
+			"type": "sound",
+			"url": "assets/sound/eff/baiganjiu.mp3"
 		}
 	]
 }
