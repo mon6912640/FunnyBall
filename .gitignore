@@ -6,3 +6,4 @@ temp/
 egret.d.ts
 manifest.json
 /manifest.json
+${tmpdir}/
