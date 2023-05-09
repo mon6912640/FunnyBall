@@ -4,7 +4,7 @@
  * @date: 2018-05-01 18:58:31 
  */
 class QuadtreeEnum {
-    static MAX_OBJECTS_COUNT:number = 5;
+    static MAX_OBJECTS_COUNT: number = 5;
     /** 最大深度（四叉树的深度一般取4-7之间为最佳） */
-    static MAX_LEVEL:number = 5;
+    static MAX_LEVEL: number = 7;
 } 

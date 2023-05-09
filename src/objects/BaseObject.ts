@@ -3,7 +3,7 @@
  * @author: monkey.lu 
  * @date: 2018-05-06 14:28:44 
  */
-class BaseObject extends egret.HashObject implements QObject{
+class BaseObject extends egret.HashObject implements QObject {
     node: Quadtree;
     level: number;
     index: number;
@@ -13,10 +13,10 @@ class BaseObject extends egret.HashObject implements QObject{
     protected _edgeW: number = 0;
     protected _edgeH: number = 0;
 
-    public view:fairygui.GComponent;
+    public view: fairygui.GComponent;
 
     /** 对象类型(ObjectType有对应枚举) */
-    public type:number = 0;
+    public type: number = 0;
 
     /** 方向速度 */
     protected _speed: number = 0;
@@ -24,9 +24,9 @@ class BaseObject extends egret.HashObject implements QObject{
     protected _angle: number = 0;
 
     /** x轴速度改变标识 */
-    protected _speedXChange:boolean = false;
+    protected _speedXChange: boolean = false;
     /** y轴速度改变标识 */
-    protected _speedYChange:boolean = false;
+    protected _speedYChange: boolean = false;
 
     protected _xChange = false;
     protected _yChange = false;
@@ -34,7 +34,7 @@ class BaseObject extends egret.HashObject implements QObject{
     /** 是否检测过碰撞（下次检测前会被重置） */
     public hitTestFlag = false;
     /** 曾经碰撞检测过的对象映射表（下次检测前会被重置） */
-    protected _checkedMap:{[id:number]:any} = {};
+    protected _checkedMap: { [id: number]: any } = {};
 
     constructor() {
         super();
@@ -49,31 +49,28 @@ class BaseObject extends egret.HashObject implements QObject{
         this._id = value;
     }
 
-    public get qid():string
-    {
-        let t_qid:string;
-        if(this.node)
-        {
-            let t_nodeLinkList:Quadtree[] = [];
-            let t_node:Quadtree = this.node;
+    public get qid(): string {
+        let t_qid: string;
+        if (this.node) {
+            let t_nodeLinkList: Quadtree[] = [];
+            let t_node: Quadtree = this.node;
             do {
                 t_nodeLinkList.push(t_node);
                 t_node = t_node.parent;
             } while (t_node);
 
             let t_index = 0;
-            for(let i = t_nodeLinkList.length-1; i>=0; i--, t_index++)
-            {
-                if(t_index == 0)
+            for (let i = t_nodeLinkList.length - 1; i >= 0; i--, t_index++) {
+                if (t_index == 0)
                     t_qid = t_nodeLinkList[i].nodeIndex.toString();
                 else
-                    t_qid += "_"+t_nodeLinkList[i].nodeIndex;
+                    t_qid += "_" + t_nodeLinkList[i].nodeIndex;
             }
         }
         return t_qid;
     }
 
-    protected _radian:number = 0;
+    protected _radian: number = 0;
     /** 弧度 */
     public get radian(): number {
         return this._radian;
@@ -83,7 +80,7 @@ class BaseObject extends egret.HashObject implements QObject{
         return this._speed;
     }
     public set speed(v: number) {
-        if(this._speed == v)
+        if (this._speed == v)
             return;
         this._speed = v;
         this._speedXChange = true;
@@ -94,7 +91,7 @@ class BaseObject extends egret.HashObject implements QObject{
         return this._angle;
     }
     public set angle(v: number) {
-        if(this._angle == v)
+        if (this._angle == v)
             return;
         this._angle = v;
         this._radian = this._angle * Math.PI / 180;
@@ -102,13 +99,12 @@ class BaseObject extends egret.HashObject implements QObject{
         this._speedYChange = true;
     }
 
-    protected _speedX:number = 0;
+    protected _speedX: number = 0;
     /**
      * x轴速度
      */
     public get speedX(): number {
-        if(this._speedXChange)
-        {
+        if (this._speedXChange) {
             if (this.angle == 0)
                 this._speedX = this.speed;
             else if (this.angle == 180)
@@ -123,13 +119,12 @@ class BaseObject extends egret.HashObject implements QObject{
         return this._speedX;
     }
 
-    protected _speedY:number = 0;
+    protected _speedY: number = 0;
     /**
      * y轴速度
      */
     public get speedY(): number {
-        if(this._speedYChange)
-        {
+        if (this._speedYChange) {
             if (this.angle == 270)
                 this._speedY = this.speed;
             else if (this.angle == 90)
@@ -146,7 +141,7 @@ class BaseObject extends egret.HashObject implements QObject{
 
     public set width(value: number) {
         this._width = value;
-        if(this.view)
+        if (this.view)
             this.view.width = value;
     }
     public get width(): number {
@@ -155,7 +150,7 @@ class BaseObject extends egret.HashObject implements QObject{
 
     public set height(value: number) {
         this._height = value;
-        if(this.view)
+        if (this.view)
             this.view.height = value;
     }
     public get height(): number {
@@ -167,11 +162,11 @@ class BaseObject extends egret.HashObject implements QObject{
         return this._x;
     }
     public set x(value: number) {
-        if(this._x == value)
+        if (this._x == value)
             return;
         this._x = value;
         this._xChange = true;
-        if(this.view)
+        if (this.view)
             this.view.x = value;
     }
 
@@ -180,44 +175,38 @@ class BaseObject extends egret.HashObject implements QObject{
         return this._y;
     }
     public set y(value: number) {
-        if(this._y == value)
+        if (this._y == value)
             return;
         this._y = value;
         this._yChange = true;
-        if(this.view)
+        if (this.view)
             this.view.y = value;
     }
 
-    protected _bounds:egret.Rectangle;
-    public get bounds():egret.Rectangle
-    {
-        if(!this._bounds)
-        {
+    protected _bounds: egret.Rectangle;
+    public get bounds(): egret.Rectangle {
+        if (!this._bounds) {
             let t_container = this.view.displayListContainer;
-            if(t_container)
-            {
+            if (t_container) {
                 this._bounds = egret.Rectangle.create();
                 this._bounds.setTo(t_container.x, t_container.y, t_container.width, t_container.height);
             }
         }
 
-        if(this._bounds)
-        {
-            if(this._xChange)
-            {
+        if (this._bounds) {
+            if (this._xChange) {
                 this._bounds.x = this.view.displayListContainer.x;
                 this._xChange = false;
             }
 
-            if(this._yChange)
-            {
+            if (this._yChange) {
                 this._bounds.y = this.view.displayListContainer.y;
                 this._yChange = false;
             }
         }
         return this._bounds;
     }
-    
+
     //======================================= API =======================================
     public initView(pW: number, pH: number, pEdgeW: number, pEdgeH: number) {
         this.initType();
@@ -234,8 +223,7 @@ class BaseObject extends egret.HashObject implements QObject{
     /**
      * 初始化类型，由之类重写
      */
-    protected initType()
-    {
+    protected initType() {
         //由之类重写
     }
 
@@ -243,24 +231,21 @@ class BaseObject extends egret.HashObject implements QObject{
      * 处理碰撞检测方法
      * @param pObj 
      */
-    public handleHitTest(pFlag:boolean)
-    {
+    public handleHitTest(pFlag: boolean) {
         //由子类重写
     }
 
-    public markCheckHittest(pObj:BaseObject)
-    {
-        this._checkedMap[pObj.id] = {"qid":pObj.qid, "index":pObj.index, "level":pObj.level};
+    public markCheckHittest(pObj: BaseObject) {
+        // this._checkedMap[pObj.id] = { "qid": pObj.qid, "index": pObj.index, "level": pObj.level };
+        this._checkedMap[pObj.id] = true;
     }
 
-    public checkHadHitTest(pObj:BaseObject):boolean
-    {
+    public checkHadHitTest(pObj: BaseObject): boolean {
         return this._checkedMap[pObj.id];
     }
 
     /** 重置碰撞检测的状态 */
-    public resetBeforeHitTest()
-    {
+    public resetBeforeHitTest() {
         this.hitTestFlag = false;
         this._checkedMap = {};
     }
@@ -294,34 +279,30 @@ class BaseObject extends egret.HashObject implements QObject{
      * （默认对象的注册点在左上角，如果对象注册点不在左上角，需要子类重写该方法）
      * @param pBounds 
      */
-    public getIndex(pBounds:egret.Rectangle):number
-    {
+    public getIndex(pBounds: egret.Rectangle): number {
         let t_index = -1;
 
         let t_myBouds = this.bounds;
-        if(t_myBouds)
-        {
+        if (t_myBouds) {
             //水平和竖直中线
             let t_xMidLine = pBounds.x + (pBounds.width >> 1);
             let t_yMidLine = pBounds.y + (pBounds.height >> 1);
-    
+
             //物体完全位于上面两个象限区域
             let t_isInTop = (t_myBouds.bottom < t_yMidLine);
             //物体完全位于下面两个象限区域
             let t_isInBottom = (t_myBouds.top > t_yMidLine);
-    
-            if(t_myBouds.right < t_xMidLine)
-            {
-                if(t_isInTop)
+
+            if (t_myBouds.right < t_xMidLine) {
+                if (t_isInTop)
                     t_index = 1; //第二象限
-                else if(t_isInBottom)
+                else if (t_isInBottom)
                     t_index = 2; //第三象限
             }
-            else if(t_myBouds.left > t_xMidLine)
-            {
-                if(t_isInTop)
+            else if (t_myBouds.left > t_xMidLine) {
+                if (t_isInTop)
                     t_index = 0; //第一象限
-                else if(t_isInBottom)
+                else if (t_isInBottom)
                     t_index = 3; //第四象限
             }
         }

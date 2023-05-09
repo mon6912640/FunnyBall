@@ -6,18 +6,16 @@
 class Quadtree {
 
     //============== 静态管理 ===================
-    private static _pool:Quadtree[] = [];
-    public static create(pLevel:number, pBounds:egret.Rectangle):Quadtree
-    {
+    private static _pool: Quadtree[] = [];
+    public static create(pLevel: number, pBounds: egret.Rectangle): Quadtree {
         let t_obj = this._pool.pop();
-        if(!t_obj)
+        if (!t_obj)
             t_obj = new Quadtree();
         t_obj.init(pLevel, pBounds);
         return t_obj;
     }
 
-    public static release(pObj:Quadtree)
-    {
+    public static release(pObj: Quadtree) {
         pObj.recycle();
         this._pool.push(pObj);
     }
@@ -27,39 +25,36 @@ class Quadtree {
 
 
     /** 节点深度 */
-    public level:number;
+    public level: number;
     /** 象限index */
     public nodeIndex = -1;
     /** 物体对象数组 */
-    private _objectList:QObject[];
+    private _objects: QObject[];
     /** 区域边界 */
-    private _bounds:egret.Rectangle;
+    private _bounds: egret.Rectangle;
     /** 四个子节点数组 */
-    private _nodeList:Quadtree[];
+    private _nodes: Quadtree[];
     /** 父节点 */
-    public parent:Quadtree;
+    public parent: Quadtree;
 
     constructor() {
     }
 
     //=============================== gettter and setter ================================
     //======================================= API =======================================
-    public init(pLevel:number, pBounds:egret.Rectangle)
-    {
+    public init(pLevel: number, pBounds: egret.Rectangle) {
         this.level = pLevel;
         this._bounds = pBounds;
-        if(!this._objectList)
-            this._objectList = [];
-        if(!this._nodeList)
-            this._nodeList = [];
+        if (!this._objects)
+            this._objects = [];
+        if (!this._nodes)
+            this._nodes = [];
     }
 
-    public recycle()
-    {
+    public recycle() {
         this.level = 0;
         this.nodeIndex = -1;
-        if(this._bounds)
-        {
+        if (this._bounds) {
             egret.Rectangle.release(this._bounds);
             this._bounds = null;
         }
@@ -70,25 +65,21 @@ class Quadtree {
      * 清空四叉树
      * @memberof Quadtree
      */
-    public clear()
-    {
+    public clear() {
         //清空对象数据
-        for(let v of this._objectList)
-        {
+        for (let v of this._objects) {
             v.node = null;
         }
-        this._objectList.length = 0; 
+        this._objects.length = 0;
 
-        for(let i = this._nodeList.length-1; i>=0; i--)
-        {
-            let t_node = this._nodeList[i];
-            if(t_node)
-            {
+        for (let i = this._nodes.length - 1; i >= 0; i--) {
+            let t_node = this._nodes[i];
+            if (t_node) {
                 t_node.clear();
                 Quadtree.release(t_node);
             }
         }
-        this._nodeList.length = 0;
+        this._nodes.length = 0;
     }
 
     /**
@@ -98,40 +89,34 @@ class Quadtree {
      * @returns 
      * @memberof Quadtree
      */
-    public insert(pObj:QObject)
-    {
+    public insert(pObj: QObject) {
         //如果已经分裂，则插入对应子象限节点
-        if(this._nodeList.length > 0)
-        {
+        if (this._nodes.length > 0) {
             let t_index = this.getIndex(pObj);
-            if(t_index != -1)
-            {
-                this._nodeList[t_index].insert(pObj);
+            if (t_index != -1) {
+                this._nodes[t_index].insert(pObj);
                 return;
             }
         }
 
         //如果还没分裂或者插入到子节点失败，则留给父节点
-        this._objectList.push(pObj);
+        this._objects.push(pObj);
         pObj.level = this.level;
         pObj.index = this.nodeIndex;
         pObj.node = this;
 
         //
-        if(this._objectList.length > QuadtreeEnum.MAX_OBJECTS_COUNT 
-            && this.level < QuadtreeEnum.MAX_LEVEL)
-        {
-            if(this._nodeList.length == 0)
+        if (this._objects.length > QuadtreeEnum.MAX_OBJECTS_COUNT
+            && this.level < QuadtreeEnum.MAX_LEVEL) {
+            if (this._nodes.length == 0)
                 this.split();
 
-            for(let i = this._objectList.length-1; i>=0; i--)
-            {
-                let t_index = this.getIndex(this._objectList[i]);
-                if(t_index != -1)
-                {
+            for (let i = this._objects.length - 1; i >= 0; i--) {
+                let t_index = this.getIndex(this._objects[i]);
+                if (t_index != -1) {
                     //加到子节点中去，并从父节点移除
-                    this._nodeList[t_index].insert(this._objectList[i]);
-                    this._objectList.splice(i, 1);
+                    this._nodes[t_index].insert(this._objects[i]);
+                    this._objects.splice(i, 1);
                 }
             }
         }
@@ -142,16 +127,13 @@ class Quadtree {
      * @param pObj 
      * @param pResultList 
      */
-    public retrieve(pObj:QObject, pResultList:QObject[]):QObject[]
-    {
+    public retrieve(pObj: QObject, pResultList: QObject[]): QObject[] {
         let t_index = this.getIndex(pObj);
-        if(t_index != -1 && this._nodeList.length > 0)
-        {
-            let t_node = this._nodeList[t_index];
+        if (t_index != -1 && this._nodes.length > 0) {
+            let t_node = this._nodes[t_index];
             t_node.retrieve(pObj, pResultList);
         }
-        for(let v of this._objectList)
-        {
+        for (let v of this._objects) {
             pResultList.push(v);
         }
         return pResultList;
@@ -165,28 +147,25 @@ class Quadtree {
      *    三  |   四
      * @memberof Quadtree
      */
-    private split()
-    {
+    private split() {
         let t_subW = this._bounds.width >> 1;
         let t_subH = this._bounds.height >> 1;
 
         let t_x = this._bounds.x;
         let t_y = this._bounds.y;
 
-        let t_tempRect:egret.Rectangle;
-
-        this._nodeList[0] = Quadtree.create(this.level+1, egret.Rectangle.create().setTo(t_x+t_subW, t_y, t_subW, t_subH));
-        this._nodeList[0].nodeIndex = 0;
-        this._nodeList[0].parent = this;
-        this._nodeList[1] = Quadtree.create(this.level+1, egret.Rectangle.create().setTo(t_x, t_y, t_subW, t_subH));
-        this._nodeList[1].nodeIndex = 1;
-        this._nodeList[1].parent = this;
-        this._nodeList[2] = Quadtree.create(this.level+1, egret.Rectangle.create().setTo(t_x, t_y+t_subH, t_subW, t_subH));
-        this._nodeList[2].nodeIndex = 2;
-        this._nodeList[2].parent = this;
-        this._nodeList[3] = Quadtree.create(this.level+1, egret.Rectangle.create().setTo(t_x+t_subW, t_y+t_subH, t_subW, t_subH));
-        this._nodeList[3].nodeIndex = 3;
-        this._nodeList[3].parent = this;
+        this._nodes[0] = Quadtree.create(this.level + 1, egret.Rectangle.create().setTo(t_x + t_subW, t_y, t_subW, t_subH));
+        this._nodes[0].nodeIndex = 0;
+        this._nodes[0].parent = this;
+        this._nodes[1] = Quadtree.create(this.level + 1, egret.Rectangle.create().setTo(t_x, t_y, t_subW, t_subH));
+        this._nodes[1].nodeIndex = 1;
+        this._nodes[1].parent = this;
+        this._nodes[2] = Quadtree.create(this.level + 1, egret.Rectangle.create().setTo(t_x, t_y + t_subH, t_subW, t_subH));
+        this._nodes[2].nodeIndex = 2;
+        this._nodes[2].parent = this;
+        this._nodes[3] = Quadtree.create(this.level + 1, egret.Rectangle.create().setTo(t_x + t_subW, t_y + t_subH, t_subW, t_subH));
+        this._nodes[3].nodeIndex = 3;
+        this._nodes[3].parent = this;
     }
 
     /**
@@ -196,8 +175,7 @@ class Quadtree {
      * @param {egret.Rectangle} pObj 
      * @memberof Quadtree
      */
-    private getIndex(pObj:QObject):number
-    {
+    private getIndex(pObj: QObject): number {
         return pObj.getIndex(this._bounds);
     }
 
