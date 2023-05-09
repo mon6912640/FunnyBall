@@ -6,8 +6,8 @@ class ObjectCircle extends BaseObject {
 
     public view: BaseItem;
 
-    private _urlNormal: string;
-    private _urlHitTest: string;
+    protected _urlNormal: string;
+    protected _urlHitTest: string;
 
     constructor() {
         super();

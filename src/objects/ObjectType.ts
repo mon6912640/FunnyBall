@@ -9,3 +9,8 @@ enum ObjectType {
     /** 矩形 */
     RETANGLE = 0b10
 }
+
+enum DataType {
+    NORMAL,
+    BULLET,
+}

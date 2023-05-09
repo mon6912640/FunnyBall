@@ -128,10 +128,16 @@ class Quadtree {
      * @param pResultList 
      */
     public retrieve(pObj: QObject, pResultList: QObject[]): QObject[] {
-        let t_index = this.getIndex(pObj);
-        if (t_index != -1 && this._nodes.length > 0) {
-            let t_node = this._nodes[t_index];
-            t_node.retrieve(pObj, pResultList);
+        if (this._nodes.length > 0) {
+            let t_index = this.getIndex(pObj);
+            if (t_index != -1) {
+                this._nodes[t_index].retrieve(pObj, pResultList);
+            } else {
+                // 如果给定对象跨越了多个象限，则检索所有子节点
+                for (let node of this._nodes) {
+                    node.retrieve(pObj, pResultList);
+                }
+            }
         }
         for (let v of this._objects) {
             pResultList.push(v);
@@ -176,9 +182,87 @@ class Quadtree {
      * @memberof Quadtree
      */
     private getIndex(pObj: QObject): number {
-        return pObj.getIndex(this._bounds);
+        let t_index = -1;
+        let t_qBounds = this._bounds;
+        let t_objBounds = pObj.bounds;
+        if (t_objBounds) {
+            //水平和竖直中线
+            let t_xMidLine = t_qBounds.x + (t_qBounds.width >> 1);
+            let t_yMidLine = t_qBounds.y + (t_qBounds.height >> 1);
+
+            //物体完全位于上面两个象限区域
+            let t_isInTop = (t_objBounds.bottom < t_yMidLine);
+            //物体完全位于下面两个象限区域
+            let t_isInBottom = (t_objBounds.top > t_yMidLine);
+
+            if (t_objBounds.right < t_xMidLine) {
+                if (t_isInTop)
+                    t_index = 1; //第二象限
+                else if (t_isInBottom)
+                    t_index = 2; //第三象限
+            }
+            else if (t_objBounds.left > t_xMidLine) {
+                if (t_isInTop)
+                    t_index = 0; //第一象限
+                else if (t_isInBottom)
+                    t_index = 3; //第四象限
+            }
+        }
+        return t_index;
     }
 
+    /**
+     * 判断物品属于哪个象限节点，跨越多个象限时，返回所有符合条件的象限节点
+     * @param pObj 
+     * @returns 
+     */
+    private getIndices(pObj: QObject): number[] {
+        let indices: number[] = [];
+        let pBounds = this._bounds;
+        let t_objBounds = pObj.bounds;
+        if (t_objBounds) {
+            //水平和竖直中线
+            let t_xMidLine = pBounds.x + (pBounds.width >> 1);
+            let t_yMidLine = pBounds.y + (pBounds.height >> 1);
+
+            //物体完全位于上面两个象限区域
+            let t_isInTop = (t_objBounds.bottom < t_yMidLine);
+            //物体完全位于下面两个象限区域
+            let t_isInBottom = (t_objBounds.top > t_yMidLine);
+
+            if (t_objBounds.right < t_xMidLine) {
+                if (t_isInTop)
+                    indices.push(1); //第二象限
+                else if (t_isInBottom)
+                    indices.push(2); //第三象限
+            }
+            else if (t_objBounds.left > t_xMidLine) {
+                if (t_isInTop)
+                    indices.push(0); //第一象限
+                else if (t_isInBottom)
+                    indices.push(3); //第四象限
+            }
+            else {
+                // 物体跨越了左右两个象限
+                if (t_isInTop) {
+                    indices.push(0);
+                    indices.push(1);
+                }
+                else if (t_isInBottom) {
+                    indices.push(2);
+                    indices.push(3);
+                }
+                else {
+                    // 物体跨越了所有四个象限
+                    indices.push(0);
+                    indices.push(1);
+                    indices.push(2);
+                    indices.push(3);
+                }
+            }
+        }
+        return indices;
+    }
     //===================================== Handler =====================================
 
 

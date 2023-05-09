@@ -1,4 +1,4 @@
-type QObject = {
+interface QObject {
     x: number;
     y: number;
     width: number;
@@ -6,5 +6,6 @@ type QObject = {
     level: number;
     index: number;
     node: Quadtree;
-    getIndex(pBounds: egret.Rectangle): number;
+    // getIndex(pBounds: egret.Rectangle): number;
+    bounds: egret.Rectangle;
 }

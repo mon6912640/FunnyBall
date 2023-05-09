@@ -9,6 +9,8 @@ class MainUIView extends monkey.BaseView {
     private _stageH: number = 0;
 
     private _objectList: BaseObject[] = [];
+    private _bulletList: BaseObject[] = [];
+    private _allObjList: BaseObject[] = [];
     private _objectMap: { [id: number]: BaseObject } = {};
     private _quad: Quadtree;
 
@@ -42,25 +44,51 @@ class MainUIView extends monkey.BaseView {
         t_graphics.lineTo(t_w, t_h * 3 / 4);
     }
 
+    $objId = 0;
+
     public start() {
         this._stageW = fairygui.GRoot.inst.width
         this._stageH = fairygui.GRoot.inst.height;
 
         for (let i = 0; i < 1000; i++) {
             let t_obj = new ObjectCircle();
-            t_obj.id = i + 1;
-            t_obj.initView(50, 50, this._stageW, this._stageH);
+            t_obj.id = ++this.$objId;
+            t_obj.dataType = DataType.NORMAL;
+            t_obj.initView(30, 30, this._stageW, this._stageH);
             this.view.addChild(t_obj.view);
             t_obj.x = this.getInitRandomPos(t_obj.width, this._stageW);
             t_obj.y = this.getInitRandomPos(t_obj.height, this._stageH);
+            // t_obj.x = 0;
+            // t_obj.y = 0;
+            // console.log(t_obj.bounds);
+            // let t_rect1 = t_obj.view.displayObject.getBounds();
+            // let t_rect2 = t_obj.view.displayObject.getTransformedBounds(this.view.displayObject);
+            // console.log(t_rect1);
+            // console.log(t_rect2);
 
             // t_obj.speed = 10+monkey.MathUtil.RandomInt(10);
             // t_obj.speed = 5+monkey.MathUtil.RandomInt(5);
-            t_obj.speed = 3;
+            t_obj.speed = 1;
             t_obj.angle = this.getAngle();
 
             this._objectList.push(t_obj);
             this._objectMap[t_obj.id] = t_obj;
+            this._allObjList.push(t_obj);
+        }
+
+        for (let i = 0; i < 100; i++) {
+            let t_bullet = new BulletCircle();
+            t_bullet.id = ++this.$objId;
+            t_bullet.dataType = DataType.BULLET;
+            t_bullet.initView(30, 30, this._stageW, this._stageH);
+            this.view.addChild(t_bullet.view);
+            t_bullet.x = this.getInitRandomPos(t_bullet.width, this._stageW);
+            t_bullet.y = this.getInitRandomPos(t_bullet.height, this._stageH);
+            t_bullet.speed = 1;
+            t_bullet.angle = this.getAngle();
+
+            this._bulletList.push(t_bullet);
+            this._allObjList.push(t_bullet);
         }
 
         this._quad = Quadtree.create(0, new egret.Rectangle(0, 0, this._stageW, this._stageH));
@@ -114,21 +142,22 @@ class MainUIView extends monkey.BaseView {
         // monkey.TimeUtil.markTs();
         let t_hitCount = 0;
         this._quad.clear();
-        for (let v of this._objectList) {
+        // for (let v of this._objectList) {
+        for (let v of this._allObjList) {
             v.x += v.speedX;
             v.y += v.speedY;
             v.checkEdge();
 
-            this._quad.insert(v);
+            if (v.dataType == DataType.NORMAL)
+                this._quad.insert(v);
 
             v.handleHitTest(false);
             v.resetBeforeHitTest();//重置碰撞检测状态
         }
 
         let t_findObjs: BaseObject[] = [];
-        for (let v of this._objectList) {
-            // if(v.hitTestFlag)
-            //     continue;
+        // for (let v of this._objectList) {
+        for (let v of this._bulletList) {
             t_findObjs.length = 0;
             this._quad.retrieve(v, t_findObjs); //检索对象所在区间的对象列表
             // console.log("检索对象数量="+t_resultList.length);
@@ -165,6 +194,6 @@ class MainUIView extends monkey.BaseView {
             this._minHitCount = t_hitCount;
 
         // monkey.TimeUtil.showMarkTs("用时");
-        // console.log("碰撞检测次数="+t_hitCount, "max="+this._maxHitCount, "min="+this._minHitCount, "avg="+this._avgCount);
+        console.log("碰撞检测次数=" + t_hitCount, "max=" + this._maxHitCount, "min=" + this._minHitCount, "avg=" + this._avgCount);
     }
 }

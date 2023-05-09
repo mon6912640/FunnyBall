@@ -18,6 +18,8 @@ class BaseObject extends egret.HashObject implements QObject {
     /** 对象类型(ObjectType有对应枚举) */
     public type: number = 0;
 
+    dataType = 0;
+
     /** 方向速度 */
     protected _speed: number = 0;
     /** 角度 */
@@ -272,44 +274,6 @@ class BaseObject extends egret.HashObject implements QObject {
             this.angle = 540 - this.angle;
         }
     }
-
-    /**
-     * 判断物体属于哪个象限节点
-     * -1指当前节点在象限之间的边界上（压线），不属于四个象限节点，而属于父节点
-     * （默认对象的注册点在左上角，如果对象注册点不在左上角，需要子类重写该方法）
-     * @param pBounds 
-     */
-    public getIndex(pBounds: egret.Rectangle): number {
-        let t_index = -1;
-
-        let t_myBouds = this.bounds;
-        if (t_myBouds) {
-            //水平和竖直中线
-            let t_xMidLine = pBounds.x + (pBounds.width >> 1);
-            let t_yMidLine = pBounds.y + (pBounds.height >> 1);
-
-            //物体完全位于上面两个象限区域
-            let t_isInTop = (t_myBouds.bottom < t_yMidLine);
-            //物体完全位于下面两个象限区域
-            let t_isInBottom = (t_myBouds.top > t_yMidLine);
-
-            if (t_myBouds.right < t_xMidLine) {
-                if (t_isInTop)
-                    t_index = 1; //第二象限
-                else if (t_isInBottom)
-                    t_index = 2; //第三象限
-            }
-            else if (t_myBouds.left > t_xMidLine) {
-                if (t_isInTop)
-                    t_index = 0; //第一象限
-                else if (t_isInBottom)
-                    t_index = 3; //第四象限
-            }
-        }
-
-        return t_index;
-    }
-
     //================================ override method ==================================
 
     //================================= private method ==================================
