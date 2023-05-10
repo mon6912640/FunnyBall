@@ -30,7 +30,7 @@ class GridNode {
     /** 象限index */
     public nodeIndex = -1;
     /** 物体对象数组 */
-    private _objectList:QObject[];
+    private _objectList:IQuadTreeObj[];
     /** 区域边界 */
     private _bounds:egret.Rectangle;
     /** 子节点列表 */
@@ -85,7 +85,7 @@ class GridNode {
      * 插入对象
      * @param pObj 
      */
-    public insert(pObj:QObject)
+    public insert(pObj:IQuadTreeObj)
     {
     }
     //===================================== private method =====================================

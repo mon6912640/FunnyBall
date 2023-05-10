@@ -3,7 +3,7 @@
  * @author: monkey.lu 
  * @date: 2018-05-06 14:28:44 
  */
-class BaseObject extends egret.HashObject implements QObject {
+class BaseObject extends egret.HashObject implements IQuadTreeObj {
     node: Quadtree;
     level: number;
     index: number;

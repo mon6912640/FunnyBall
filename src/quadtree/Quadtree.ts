@@ -1,9 +1,19 @@
+interface IQuadTreeObj {
+    /** 包围盒边界 */
+    bounds: egret.Rectangle;
+}
+
 /**
  * 四叉树索引节点
  * @author: monkey.lu 
  * @date: 2018-05-01 11:59:17 
  */
 class Quadtree {
+
+    /** 每个节点的对象容量 */
+    static MAX_OBJECTS_COUNT: number = 5;
+    /** 最大深度（四叉树的深度一般取4-7之间为最佳） */
+    static MAX_LEVEL: number = 7;
 
     //============== 静态管理 ===================
     private static _pool: Quadtree[] = [];
@@ -29,7 +39,7 @@ class Quadtree {
     /** 象限index */
     public nodeIndex = -1;
     /** 物体对象数组 */
-    private _objects: QObject[];
+    private _objects: IQuadTreeObj[];
     /** 区域边界 */
     private _bounds: egret.Rectangle;
     /** 四个子节点数组 */
@@ -67,11 +77,7 @@ class Quadtree {
      */
     public clear() {
         //清空对象数据
-        for (let v of this._objects) {
-            v.node = null;
-        }
         this._objects.length = 0;
-
         for (let i = this._nodes.length - 1; i >= 0; i--) {
             let t_node = this._nodes[i];
             if (t_node) {
@@ -89,7 +95,7 @@ class Quadtree {
      * @returns 
      * @memberof Quadtree
      */
-    public insert(pObj: QObject) {
+    public insert(pObj: IQuadTreeObj) {
         //如果已经分裂，则插入对应子象限节点
         if (this._nodes.length > 0) {
             let t_index = this.getIndex(pObj);
@@ -101,13 +107,9 @@ class Quadtree {
 
         //如果还没分裂或者插入到子节点失败，则留给父节点
         this._objects.push(pObj);
-        pObj.level = this.level;
-        pObj.index = this.nodeIndex;
-        pObj.node = this;
 
-        //
-        if (this._objects.length > QuadtreeEnum.MAX_OBJECTS_COUNT
-            && this.level < QuadtreeEnum.MAX_LEVEL) {
+        if (this._objects.length > Quadtree.MAX_OBJECTS_COUNT
+            && this.level < Quadtree.MAX_LEVEL) {
             if (this._nodes.length == 0)
                 this.split();
 
@@ -127,16 +129,11 @@ class Quadtree {
      * @param pObj 
      * @param pResultList 
      */
-    public retrieve(pObj: QObject, pResultList: QObject[]): QObject[] {
+    public retrieve(pObj: IQuadTreeObj, pResultList: IQuadTreeObj[]): IQuadTreeObj[] {
         if (this._nodes.length > 0) {
-            let t_index = this.getIndex(pObj);
-            if (t_index != -1) {
-                this._nodes[t_index].retrieve(pObj, pResultList);
-            } else {
-                // 如果给定对象跨越了多个象限，则检索所有子节点
-                for (let node of this._nodes) {
-                    node.retrieve(pObj, pResultList);
-                }
+            let t_indices = this.getIndices(pObj); //对象范围在哪些象限内，跨象限的返回长度超过1
+            for (let i = 0; i < t_indices.length; i++) {
+                this._nodes[t_indices[i]].retrieve(pObj, pResultList);
             }
         }
         for (let v of this._objects) {
@@ -181,7 +178,7 @@ class Quadtree {
      * @param {egret.Rectangle} pObj 
      * @memberof Quadtree
      */
-    private getIndex(pObj: QObject): number {
+    private getIndex(pObj: IQuadTreeObj): number {
         let t_index = -1;
         let t_qBounds = this._bounds;
         let t_objBounds = pObj.bounds;
@@ -216,7 +213,7 @@ class Quadtree {
      * @param pObj 
      * @returns 
      */
-    private getIndices(pObj: QObject): number[] {
+    private getIndices(pObj: IQuadTreeObj): number[] {
         let indices: number[] = [];
         let pBounds = this._bounds;
         let t_objBounds = pObj.bounds;
