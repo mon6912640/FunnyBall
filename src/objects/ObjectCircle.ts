@@ -8,6 +8,7 @@ class ObjectCircle extends BaseObject {
 
     protected _urlNormal: string;
     protected _urlHitTest: string;
+    protected _urlMark: string;
 
     constructor() {
         super();
@@ -40,6 +41,13 @@ class ObjectCircle extends BaseObject {
             this.view.m_bgLoader.url = this._urlHitTest;
         else
             this.view.m_bgLoader.url = this._urlNormal;
+    }
+
+    showMark() {
+        let t = this;
+        if (t._urlMark === undefined)
+            t._urlMark = fairygui.UIPackage.getItemURL("main", "basecircle_yellow");
+        t.view.m_bgLoader.url = t._urlMark;
     }
 
     /** 检查边界，修正角度 */

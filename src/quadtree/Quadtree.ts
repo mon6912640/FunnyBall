@@ -11,7 +11,7 @@ interface IQuadTreeObj {
 class Quadtree {
 
     /** 每个节点的对象容量 */
-    static MAX_OBJECTS_COUNT: number = 5;
+    static MAX_OBJECTS_COUNT: number = 4;
     /** 最大深度（四叉树的深度一般取4-7之间为最佳） */
     static MAX_LEVEL: number = 7;
 
@@ -132,6 +132,7 @@ class Quadtree {
     public retrieve(pObj: IQuadTreeObj, pResultList: IQuadTreeObj[]): IQuadTreeObj[] {
         if (this._nodes.length > 0) {
             let t_indices = this.getIndices(pObj); //对象范围在哪些象限内，跨象限的返回长度超过1
+            // console.log("t_indices", this.level, t_indices);
             for (let i = 0; i < t_indices.length; i++) {
                 this._nodes[t_indices[i]].retrieve(pObj, pResultList);
             }
@@ -156,6 +157,8 @@ class Quadtree {
 
         let t_x = this._bounds.x;
         let t_y = this._bounds.y;
+
+        this._nodes.length = 4;
 
         this._nodes[0] = Quadtree.create(this.level + 1, egret.Rectangle.create().setTo(t_x + t_subW, t_y, t_subW, t_subH));
         this._nodes[0].nodeIndex = 0;
@@ -227,35 +230,34 @@ class Quadtree {
             //物体完全位于下面两个象限区域
             let t_isInBottom = (t_objBounds.top > t_yMidLine);
 
-            if (t_objBounds.right < t_xMidLine) {
+            //物体完全位于左边两个象限区域
+            let t_isInLeft = (t_objBounds.right < t_xMidLine);
+            //物体完全位于右边两个象限区域
+            let t_isInRight = (t_objBounds.left > t_xMidLine);
+
+            if (t_isInLeft) {
                 if (t_isInTop)
                     indices.push(1); //第二象限
                 else if (t_isInBottom)
                     indices.push(2); //第三象限
+                else
+                    indices.push(1, 2); //第二、三象限
             }
-            else if (t_objBounds.left > t_xMidLine) {
+            else if (t_isInRight) {
                 if (t_isInTop)
                     indices.push(0); //第一象限
                 else if (t_isInBottom)
                     indices.push(3); //第四象限
+                else
+                    indices.push(0, 3); //第一、四象限
             }
             else {
-                // 物体跨越了左右两个象限
-                if (t_isInTop) {
-                    indices.push(0);
-                    indices.push(1);
-                }
-                else if (t_isInBottom) {
-                    indices.push(2);
-                    indices.push(3);
-                }
-                else {
-                    // 物体跨越了所有四个象限
-                    indices.push(0);
-                    indices.push(1);
-                    indices.push(2);
-                    indices.push(3);
-                }
+                if (t_isInTop)
+                    indices.push(0, 1); //第一、二象限
+                else if (t_isInBottom)
+                    indices.push(2, 3); //第三、四象限
+                else
+                    indices.push(0, 1, 2, 3); //所有象限
             }
         }
         return indices;

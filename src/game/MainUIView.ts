@@ -80,7 +80,12 @@ class MainUIView extends monkey.BaseView {
             let t_bullet = new BulletCircle();
             t_bullet.id = ++this.$objId;
             t_bullet.dataType = DataType.BULLET;
-            t_bullet.initView(30, 30, this._stageW, this._stageH);
+            t_bullet.initView(50, 50, this._stageW, this._stageH);
+            // console.log("==========================");
+            // console.log(t_bullet.view.displayObject.getBounds());
+            // console.log(t_bullet.view.displayObject.getTransformedBounds(this.view.displayObject));
+            // console.log(t_bullet.bounds);
+
             this.view.addChild(t_bullet.view);
             t_bullet.x = this.getInitRandomPos(t_bullet.width, this._stageW);
             t_bullet.y = this.getInitRandomPos(t_bullet.height, this._stageH);
@@ -139,6 +144,7 @@ class MainUIView extends monkey.BaseView {
             }
             return;
         }
+        // return;
         // monkey.TimeUtil.markTs();
         let t_hitCount = 0;
         this._quad.clear();
@@ -173,6 +179,7 @@ class MainUIView extends monkey.BaseView {
                 t_hitCount++;
                 v.markCheckHittest(vfind);
                 vfind.markCheckHittest(v);
+                // vfind.showMark(); //显示检测过的标记
                 if (t_hitFlag) {
                     v.hitTestFlag = true; //记录碰撞检测状态
                     vfind.hitTestFlag = true;
